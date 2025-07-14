@@ -3,116 +3,617 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>3D Computer Model</title>
-    <link rel="stylesheet" href="style.css" />
+    <title>Interactive 3D Portfolio</title>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.min.js"></script>
     <style>
-      body,
-      html {
+      * {
         margin: 0;
         padding: 0;
+        box-sizing: border-box;
+      }
+
+      body,
+      html {
+        height: 100%;
         overflow: hidden;
-        background: #111;
+        background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        color: #fff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .container {
+        position: relative;
+        width: 100%;
+        max-width: 1200px;
+        height: 90vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+        border-radius: 15px;
+        overflow: hidden;
+      }
+
+      header {
+        background: rgba(0, 0, 0, 0.7);
+        padding: 15px 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        z-index: 100;
+      }
+
+      .logo {
+        font-size: 24px;
+        font-weight: 700;
+        background: linear-gradient(90deg, #ff8a00, #e52e71);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      nav ul {
+        display: flex;
+        list-style: none;
+      }
+
+      nav li {
+        margin: 0 15px;
+      }
+
+      nav a {
+        color: #ddd;
+        text-decoration: none;
+        font-weight: 500;
+        padding: 5px 10px;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+      }
+
+      nav a:hover {
+        color: #fff;
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      #scene-container {
+        flex: 1;
+        position: relative;
       }
 
       canvas {
         display: block;
-      }
-
-      #three-canvas {
-        position: fixed;
+        position: absolute;
         top: 0;
         left: 0;
-        width: 100vw;
-        height: 100vh;
-        z-index: 1;
+        width: 100%;
+        height: 100%;
       }
 
-      .back-button {
-        position: fixed;
-        top: 20px;
+      .loading {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 24px;
+        z-index: 5;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 20px 40px;
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top: 5px solid #e52e71;
+        animation: spin 1s linear infinite;
+        margin-bottom: 20px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .hotspot-label {
+        position: absolute;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 14px;
+        pointer-events: none;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.3s ease;
+        z-index: 20;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      }
+
+      .hotspot-label::after {
+        content: "";
+        position: absolute;
+        top: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 5px solid transparent;
+        border-bottom-color: rgba(0, 0, 0, 0.8);
+      }
+
+      .controls {
+        position: absolute;
+        bottom: 20px;
         left: 20px;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 15px;
+        border-radius: 10px;
         z-index: 10;
-        background: rgba(76, 201, 240, 0.8);
-        color: #000;
-        padding: 10px 20px;
-        border-radius: 30px;
-        text-decoration: none;
-        font-weight: 500;
-        transition: 0.3s ease;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
       }
 
-      .back-button:hover {
-        background: #3b82f6;
+      .controls p {
+        margin-bottom: 10px;
+        font-size: 14px;
+        color: #aaa;
+      }
+
+      .info-panel {
+        position: absolute;
+        top: 50%;
+        right: -400px;
+        transform: translateY(-50%);
+        width: 350px;
+        background: rgba(0, 0, 0, 0.85);
+        padding: 25px;
+        border-radius: 10px;
+        z-index: 50;
+        transition: right 0.5s ease;
+        border-left: 3px solid #e52e71;
+        backdrop-filter: blur(10px);
+      }
+
+      .info-panel.active {
+        right: 20px;
+      }
+
+      .info-panel h2 {
+        font-size: 24px;
+        margin-bottom: 20px;
+        color: #e52e71;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 10px;
+      }
+
+      .info-panel p {
+        line-height: 1.6;
+        margin-bottom: 15px;
+        color: #ddd;
+      }
+
+      .close-btn {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: none;
+        border: none;
+        color: #aaa;
+        font-size: 20px;
+        cursor: pointer;
+        transition: color 0.3s;
+      }
+
+      .close-btn:hover {
         color: #fff;
+      }
+
+      footer {
+        background: rgba(0, 0, 0, 0.7);
+        padding: 15px;
+        text-align: center;
+        font-size: 14px;
+        color: #aaa;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .notification {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: rgba(40, 167, 69, 0.9);
+        color: white;
+        padding: 15px 25px;
+        border-radius: 5px;
+        z-index: 100;
+        transform: translateX(150%);
+        transition: transform 0.3s ease;
+      }
+
+      .notification.show {
+        transform: translateX(0);
       }
     </style>
   </head>
   <body>
-    <a href="index.html" class="back-button">← Back to Portfolio</a>
-    <div id="three-canvas"></div>
+    <div class="container">
+      <header>
+        <div class="logo">3D PORTFOLIO</div>
+        <nav>
+          <ul>
+            <li><a href="#" class="nav-link" data-section="about">About</a></li>
+            <li>
+              <a href="#" class="nav-link" data-section="projects">Projects</a>
+            </li>
+            <li>
+              <a href="#" class="nav-link" data-section="contact">Contact</a>
+            </li>
+          </ul>
+        </nav>
+      </header>
 
-    <script type="module">
-      import * as THREE from "https://unpkg.com/three@0.152.2/build/three.module.js";
-      import { GLTFLoader } from "https://unpkg.com/three@0.152.2/examples/jsm/loaders/GLTFLoader.js";
-      import { OrbitControls } from "https://unpkg.com/three@0.152.2/examples/jsm/controls/OrbitControls.js";
+      <div id="scene-container">
+        <div class="loading">
+          <div class="loading-spinner"></div>
+          <p>Loading 3D Experience...</p>
+        </div>
+      </div>
 
+      <div class="controls">
+        <p>← → ↑ ↓ : Rotate Model</p>
+        <p>Mouse Wheel : Zoom In/Out</p>
+      </div>
+
+      <div class="info-panel" id="info-panel">
+        <button class="close-btn">&times;</button>
+        <h2 id="panel-title">About Me</h2>
+        <div id="panel-content">
+          <!-- Content will be loaded here dynamically -->
+        </div>
+      </div>
+
+      <div class="notification" id="notification">
+        Navigating to <span id="section-name">About</span> section
+      </div>
+
+      <footer>
+        &copy; 2023 Interactive 3D Portfolio | Created with Three.js
+      </footer>
+    </div>
+
+    <script>
+      // Initialize Three.js
+      const container = document.getElementById("scene-container");
+      const loadingIndicator = document.querySelector(".loading");
+      const infoPanel = document.getElementById("info-panel");
+      const panelTitle = document.getElementById("panel-title");
+      const panelContent = document.getElementById("panel-content");
+      const notification = document.getElementById("notification");
+      const sectionName = document.getElementById("section-name");
+
+      // Set initial panel content
+      const panelContents = {
+        about: `
+                <p>Welcome to my interactive portfolio! I'm a passionate 3D developer and designer with expertise in creating immersive web experiences.</p>
+                <p>With over 5 years of experience in Three.js and WebGL, I specialize in bringing complex 3D models to life in the browser.</p>
+                <p>My skills include:</p>
+                <ul style="padding-left: 20px; margin: 10px 0;">
+                    <li>Three.js & WebGL development</li>
+                    <li>3D modeling and optimization</li>
+                    <li>Interactive web design</li>
+                    <li>Performance optimization</li>
+                </ul>
+            `,
+        projects: `
+                <p>Here are some of my recent projects:</p>
+                <div style="margin-top: 20px;">
+                    <h3 style="color: #e52e71; margin-bottom: 5px;">E-Commerce 3D Viewer</h3>
+                    <p>Interactive product visualization for online retailers, increasing conversion rates by 35%.</p>
+                    
+                    <h3 style="color: #e52e71; margin: 15px 0 5px;">Architectural Visualization</h3>
+                    <p>Real-time 3D walkthroughs for real estate developers with VR compatibility.</p>
+                    
+                    <h3 style="color: #e52e71; margin: 15px 0 5px;">Educational Simulations</h3>
+                    <p>Interactive 3D models for STEM education used by schools and universities.</p>
+                </div>
+            `,
+        contact: `
+                <p>Let's work together! Reach out to me through any of these channels:</p>
+                <div style="margin-top: 20px;">
+                    <p><strong>Email:</strong> contact@myportfolio.com</p>
+                    <p><strong>LinkedIn:</strong> linkedin.com/in/myname</p>
+                    <p><strong>GitHub:</strong> github.com/myusername</p>
+                    <p><strong>Phone:</strong> +1 (555) 123-4567</p>
+                </div>
+                <div style="margin-top: 25px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px;">
+                    <h3 style="color: #e52e71; margin-bottom: 10px;">Send me a message</h3>
+                    <form>
+                        <input type="text" placeholder="Your Name" style="width: 100%; padding: 8px; margin-bottom: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; color: white;">
+                        <input type="email" placeholder="Your Email" style="width: 100%; padding: 8px; margin-bottom: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; color: white;">
+                        <textarea placeholder="Your Message" style="width: 100%; height: 80px; padding: 8px; margin-bottom: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; color: white;"></textarea>
+                        <button type="submit" style="background: #e52e71; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer;">Send Message</button>
+                    </form>
+                </div>
+            `,
+      };
+
+      // Scene setup
       const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x111118);
+
       const camera = new THREE.PerspectiveCamera(
-        60,
-        window.innerWidth / window.innerHeight,
+        45,
+        container.clientWidth / container.clientHeight,
         0.1,
         1000
       );
-      camera.position.set(2, 1.5, 3);
+      camera.position.set(0, 1, 8);
 
-      const renderer = new THREE.WebGLRenderer({ antialias: true });
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      const renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: false,
+      });
+      renderer.setSize(container.clientWidth, container.clientHeight);
       renderer.setPixelRatio(window.devicePixelRatio);
-      document.getElementById("three-canvas").appendChild(renderer.domElement);
+      container.appendChild(renderer.domElement);
 
-      const controls = new OrbitControls(camera, renderer.domElement);
-      controls.enableDamping = true;
-
+      // Add lighting
       const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
       scene.add(ambientLight);
 
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-      directionalLight.position.set(5, 10, 7.5);
-      scene.add(directionalLight);
+      const directionalLight1 = new THREE.DirectionalLight(0xffffff, 0.8);
+      directionalLight1.position.set(3, 5, 2);
+      scene.add(directionalLight1);
 
-      const loader = new GLTFLoader();
+      const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.4);
+      directionalLight2.position.set(-3, -2, -4);
+      scene.add(directionalLight2);
+
+      const hemisphereLight = new THREE.HemisphereLight(
+        0xffffbb,
+        0x080820,
+        0.4
+      );
+      scene.add(hemisphereLight);
+
+      // Add grid and axes helpers
+      const gridHelper = new THREE.GridHelper(20, 20, 0x444444, 0x222222);
+      scene.add(gridHelper);
+
+      // Add orbit controls
+      const controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.minDistance = 4;
+      controls.maxDistance = 15;
+      controls.enablePan = false;
+
+      // Create hotspot markers
+      function createHotspot(position, color, target) {
+        const geometry = new THREE.SphereGeometry(0.15, 16, 16);
+        const material = new THREE.MeshBasicMaterial({
+          color: color,
+          transparent: true,
+          opacity: 0.8,
+        });
+        const sphere = new THREE.Mesh(geometry, material);
+        sphere.position.copy(position);
+        sphere.userData = { target: target };
+
+        // Add pulsing animation
+        let scale = 1;
+        const animatePulse = () => {
+          if (!sphere.userData.removed) {
+            scale = 0.9 + 0.1 * Math.sin(Date.now() * 0.002);
+            sphere.scale.set(scale, scale, scale);
+            requestAnimationFrame(animatePulse);
+          }
+        };
+        animatePulse();
+
+        return sphere;
+      }
+
+      // Hotspot positions (adjusted for combi.glb model)
+      const hotspots = [
+        {
+          position: new THREE.Vector3(1.5, 1.8, 0.5),
+          color: 0xff3366,
+          target: "about",
+        },
+        {
+          position: new THREE.Vector3(-1.2, 1.0, 1.2),
+          color: 0x33cc33,
+          target: "projects",
+        },
+        {
+          position: new THREE.Vector3(0.8, 0.5, -1.0),
+          color: 0x3399ff,
+          target: "contact",
+        },
+      ];
+
+      // Load GLB model
+      const loader = new THREE.GLTFLoader();
+      let model;
+
       loader.load(
-        "models/combi.glb", // path to your model file
+        "models/combi.glb",
         (gltf) => {
-          console.log("Model loaded successfully");
-          const model = gltf.scene;
-          model.scale.set(1.5, 1.5, 1.5);
+          model = gltf.scene;
           scene.add(model);
+
+          // Add hotspots to the scene
+          hotspots.forEach((hotspot) => {
+            const marker = createHotspot(
+              hotspot.position,
+              hotspot.color,
+              hotspot.target
+            );
+            scene.add(marker);
+          });
+
+          // Remove loading indicator
+          if (loadingIndicator.parentNode) {
+            loadingIndicator.parentNode.removeChild(loadingIndicator);
+          }
+
+          // Show welcome notification
+          showNotification("3D Portfolio Loaded!");
         },
-        (xhr) => {
-          console.log(
-            `Model loading: ${(xhr.loaded / xhr.total) * 100}% loaded`
-          );
-        },
+        undefined,
         (error) => {
           console.error("Error loading model:", error);
+          loadingIndicator.textContent = "Error loading model. Check console.";
         }
       );
 
+      // Handle window resize
+      window.addEventListener("resize", () => {
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+      });
+
+      // Raycasting for hotspot interaction
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+
+      function onMouseMove(event) {
+        // Calculate mouse position in normalized device coordinates
+        const rect = renderer.domElement.getBoundingClientRect();
+        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+        // Update the picking ray with the camera and mouse position
+        raycaster.setFromCamera(mouse, camera);
+
+        // Remove any existing labels
+        document
+          .querySelectorAll(".hotspot-label")
+          .forEach((el) => el.remove());
+
+        // Calculate objects intersecting the picking ray
+        const intersects = raycaster.intersectObjects(scene.children);
+
+        for (let i = 0; i < intersects.length; i++) {
+          const object = intersects[i].object;
+
+          // Check if we have a hotspot
+          if (object.userData.target) {
+            // Get screen position of hotspot
+            const vector = object.position.clone();
+            vector.project(camera);
+
+            const x = (vector.x * 0.5 + 0.5) * container.clientWidth;
+            const y = (-vector.y * 0.5 + 0.5) * container.clientHeight;
+
+            // Create label
+            const label = document.createElement("div");
+            label.className = "hotspot-label";
+            label.textContent = object.userData.target.toUpperCase();
+            label.style.left = x + "px";
+            label.style.top = y - 40 + "px";
+            container.appendChild(label);
+
+            // Animate label appearance
+            setTimeout(() => {
+              label.style.opacity = "1";
+              label.style.transform = "translateY(0)";
+            }, 10);
+
+            break;
+          }
+        }
+      }
+
+      function onMouseClick(event) {
+        // Update the picking ray with the camera and mouse position
+        raycaster.setFromCamera(mouse, camera);
+
+        // Calculate objects intersecting the picking ray
+        const intersects = raycaster.intersectObjects(scene.children);
+
+        for (let i = 0; i < intersects.length; i++) {
+          const object = intersects[i].object;
+
+          // Check if we have a hotspot
+          if (object.userData.target) {
+            navigateToSection(object.userData.target);
+            break;
+          }
+        }
+      }
+
+      // Navigation functions
+      function navigateToSection(section) {
+        // Update panel content
+        panelTitle.textContent =
+          section.charAt(0).toUpperCase() + section.slice(1);
+        panelContent.innerHTML = panelContents[section];
+
+        // Show panel
+        infoPanel.classList.add("active");
+
+        // Show notification
+        sectionName.textContent = section;
+        showNotification();
+      }
+
+      function showNotification(text) {
+        if (text) {
+          notification.textContent = text;
+        }
+
+        notification.classList.add("show");
+
+        setTimeout(() => {
+          notification.classList.remove("show");
+        }, 3000);
+      }
+
+      // Close panel button
+      document.querySelector(".close-btn").addEventListener("click", () => {
+        infoPanel.classList.remove("active");
+      });
+
+      // Navigation links
+      document.querySelectorAll(".nav-link").forEach((link) => {
+        link.addEventListener("click", (e) => {
+          e.preventDefault();
+          navigateToSection(link.dataset.section);
+        });
+      });
+
+      // Event listeners
+      renderer.domElement.addEventListener("mousemove", onMouseMove);
+      renderer.domElement.addEventListener("click", onMouseClick);
+
+      // Animation loop
       function animate() {
         requestAnimationFrame(animate);
+
+        // Rotate model slowly
+        if (model) {
+          model.rotation.y += 0.002;
+        }
+
         controls.update();
         renderer.render(scene, camera);
       }
-
       animate();
-
-      window.addEventListener("resize", () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      });
     </script>
   </body>
 </html>
