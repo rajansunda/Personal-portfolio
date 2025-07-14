@@ -143,7 +143,7 @@
       /* Section Info Panel */
       .section-info {
         position: absolute;
-        top: 50%;
+        top: 40%;
         left: 30px;
         transform: translateY(-50%);
         background: rgba(30, 40, 80, 0.9);
@@ -153,7 +153,7 @@
         border: 1px solid rgba(76, 201, 240, 0.3);
         max-width: 400px;
         pointer-events: auto;
-        opacity: 0;
+        opacity: 1;
         transition: all 0.3s ease;
       }
 
@@ -563,7 +563,7 @@
       </div>
 
       <!-- Section Info Panel -->
-      <div class="section-info" id="sectionInfo">
+      <div class="section-info active" id="sectionInfo">
         <h2 id="sectionTitle">Welcome!</h2>
         <div id="sectionContent">
           <p>
@@ -572,6 +572,7 @@
             and experience.
           </p>
           <p>Use WASD keys to move your character around!</p>
+          <p>You can also zoom in and out using the mouse scroll wheel.</p>
         </div>
       </div>
 
@@ -633,7 +634,7 @@
           0.1,
           1000
         );
-        camera.position.set(0, 8, 12);
+        camera.position.set(0, 24, 40);
 
         // OrbitControls setup
         controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -852,6 +853,7 @@
           content: `
                           <p>Move around the 3D space to explore different sections of my portfolio. Each glowing zone contains information about my skills, projects, and experience.</p>
                           <p>Use WASD keys to move your character around!</p>
+                          <p>You can also zoom in and out using the mouse scroll wheel!</p>
                       `,
         });
       }
@@ -1029,6 +1031,7 @@
             content: `
         <p>Move around the 3D space to explore different sections of my portfolio. Each glowing zone contains information about my skills, projects, and experience.</p>
         <p>Use WASD keys to move your character around!</p>
+        <p>You can also zoom in and out using the mouse scroll wheel.</p>
       `,
           });
         }
