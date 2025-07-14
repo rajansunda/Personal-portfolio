@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Interactive 3D Portfolio</title>
+    <title>3D Interactive Portfolio</title>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.min.js"></script>
@@ -21,20 +21,14 @@
         background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         color: #fff;
-        display: flex;
-        justify-content: center;
-        align-items: center;
       }
 
       .container {
         position: relative;
         width: 100%;
-        max-width: 1200px;
-        height: 90vh;
+        height: 100vh;
         display: flex;
         flex-direction: column;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
-        border-radius: 15px;
         overflow: hidden;
       }
 
@@ -48,41 +42,130 @@
         z-index: 100;
       }
 
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .back-btn {
+        background: linear-gradient(45deg, #ff8a00, #e52e71);
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 30px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 15px rgba(229, 46, 113, 0.3);
+      }
+
+      .back-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(229, 46, 113, 0.5);
+      }
+
       .logo {
-        font-size: 24px;
+        font-size: 28px;
         font-weight: 700;
         background: linear-gradient(90deg, #ff8a00, #e52e71);
         -webkit-background-clip: text;
         background-clip: text;
         -webkit-text-fill-color: transparent;
+        letter-spacing: 1px;
       }
 
       nav ul {
         display: flex;
         list-style: none;
-      }
-
-      nav li {
-        margin: 0 15px;
+        gap: 25px;
       }
 
       nav a {
         color: #ddd;
         text-decoration: none;
         font-weight: 500;
-        padding: 5px 10px;
+        padding: 8px 15px;
         border-radius: 5px;
         transition: all 0.3s ease;
+        font-size: 18px;
+        position: relative;
       }
 
       nav a:hover {
         color: #fff;
-        background: rgba(255, 255, 255, 0.1);
       }
 
-      #scene-container {
-        flex: 1;
+      nav a::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #ff8a00, #e52e71);
+        transition: width 0.3s ease;
+      }
+
+      nav a:hover::after {
+        width: 100%;
+      }
+
+      .model-container {
         position: relative;
+        flex: 1;
+        height: calc(100vh - 120px);
+        border-radius: 0;
+        overflow: hidden;
+        background: rgba(0, 0, 0, 0.3);
+      }
+
+      .info-panel {
+        position: absolute;
+        top: 100px;
+        right: 30px;
+        width: 320px;
+        background: rgba(0, 0, 0, 0.85);
+        padding: 25px;
+        border-radius: 12px;
+        border-left: 4px solid #e52e71;
+        backdrop-filter: blur(10px);
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        z-index: 50;
+      }
+
+      .info-panel h2 {
+        font-size: 32px;
+        margin-bottom: 20px;
+        color: #e52e71;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 10px;
+      }
+
+      .info-panel p {
+        line-height: 1.7;
+        margin-bottom: 20px;
+        color: #ddd;
+        font-size: 17px;
+      }
+
+      .hotspot-info {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 15px;
+      }
+
+      .hotspot-info h3 {
+        color: #ff8a00;
+        margin-bottom: 10px;
+        font-size: 20px;
       }
 
       canvas {
@@ -133,9 +216,9 @@
         position: absolute;
         background: rgba(0, 0, 0, 0.8);
         color: white;
-        padding: 8px 15px;
-        border-radius: 20px;
-        font-size: 14px;
+        padding: 10px 20px;
+        border-radius: 30px;
+        font-size: 16px;
         pointer-events: none;
         opacity: 0;
         transform: translateY(10px);
@@ -143,16 +226,7 @@
         z-index: 20;
         border: 1px solid rgba(255, 255, 255, 0.2);
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-      }
-
-      .hotspot-label::after {
-        content: "";
-        position: absolute;
-        top: -10px;
-        left: 50%;
-        transform: translateX(-50%);
-        border: 5px solid transparent;
-        border-bottom-color: rgba(0, 0, 0, 0.8);
+        font-weight: 500;
       }
 
       .controls {
@@ -160,132 +234,160 @@
         bottom: 20px;
         left: 20px;
         background: rgba(0, 0, 0, 0.7);
-        padding: 15px;
+        padding: 15px 20px;
         border-radius: 10px;
         z-index: 10;
+        font-size: 16px;
       }
 
       .controls p {
         margin-bottom: 10px;
-        font-size: 14px;
         color: #aaa;
-      }
-
-      .info-panel {
-        position: absolute;
-        top: 50%;
-        right: -400px;
-        transform: translateY(-50%);
-        width: 350px;
-        background: rgba(0, 0, 0, 0.85);
-        padding: 25px;
-        border-radius: 10px;
-        z-index: 50;
-        transition: right 0.5s ease;
-        border-left: 3px solid #e52e71;
-        backdrop-filter: blur(10px);
-      }
-
-      .info-panel.active {
-        right: 20px;
-      }
-
-      .info-panel h2 {
-        font-size: 24px;
-        margin-bottom: 20px;
-        color: #e52e71;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        padding-bottom: 10px;
-      }
-
-      .info-panel p {
-        line-height: 1.6;
-        margin-bottom: 15px;
-        color: #ddd;
-      }
-
-      .close-btn {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        background: none;
-        border: none;
-        color: #aaa;
-        font-size: 20px;
-        cursor: pointer;
-        transition: color 0.3s;
-      }
-
-      .close-btn:hover {
-        color: #fff;
       }
 
       footer {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
         background: rgba(0, 0, 0, 0.7);
         padding: 15px;
         text-align: center;
-        font-size: 14px;
+        font-size: 16px;
         color: #aaa;
         border-top: 1px solid rgba(255, 255, 255, 0.1);
+        z-index: 10;
       }
 
-      .notification {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        background: rgba(40, 167, 69, 0.9);
-        color: white;
-        padding: 15px 25px;
-        border-radius: 5px;
-        z-index: 100;
-        transform: translateX(150%);
-        transition: transform 0.3s ease;
+      .hotspot-counter {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
       }
 
-      .notification.show {
-        transform: translateX(0);
+      .counter-item {
+        flex: 1;
+        text-align: center;
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        transition: all 0.3s ease;
+      }
+
+      .counter-item:hover {
+        background: rgba(229, 46, 113, 0.2);
+        transform: translateY(-5px);
+      }
+
+      .counter-item h3 {
+        font-size: 28px;
+        color: #ff8a00;
+        margin-bottom: 5px;
+      }
+
+      .counter-item p {
+        font-size: 16px;
+        color: #ddd;
+        margin: 0;
+      }
+
+      .hotspot-guide {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .guide-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .color-dot {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+      }
+
+      .red-dot {
+        background: #ff3366;
+      }
+      .green-dot {
+        background: #33cc33;
+      }
+      .blue-dot {
+        background: #3399ff;
       }
     </style>
   </head>
   <body>
     <div class="container">
       <header>
-        <div class="logo">3D PORTFOLIO</div>
+        <div class="header-left">
+          <button class="back-btn" onclick="window.location.href='index.html'">
+            ← Back to Portfolio
+          </button>
+          <div class="logo">3D PORTFOLIO</div>
+        </div>
         <nav>
           <ul>
-            <li><a href="#" class="nav-link" data-section="about">About</a></li>
-            <li>
-              <a href="#" class="nav-link" data-section="projects">Projects</a>
-            </li>
-            <li>
-              <a href="#" class="nav-link" data-section="contact">Contact</a>
-            </li>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Projects</a></li>
+            <li><a href="#">Contact</a></li>
           </ul>
         </nav>
       </header>
 
-      <div id="scene-container">
+      <div class="model-container">
         <div class="loading">
           <div class="loading-spinner"></div>
           <p>Loading 3D Experience...</p>
         </div>
-      </div>
-
-      <div class="controls">
-        <p>← → ↑ ↓ : Rotate Model</p>
-        <p>Mouse Wheel : Zoom In/Out</p>
-      </div>
-
-      <div class="info-panel" id="info-panel">
-        <button class="close-btn">&times;</button>
-        <h2 id="panel-title">About Me</h2>
-        <div id="panel-content">
-          <!-- Content will be loaded here dynamically -->
+        <div class="controls">
+          <p>← → ↑ ↓ : Rotate Model</p>
+          <p>Mouse Wheel : Zoom In/Out</p>
         </div>
       </div>
 
-      <div class="notification" id="notification">
-        Navigating to <span id="section-name">About</span> section
+      <div class="info-panel">
+        <h2>Interactive 3D Showcase</h2>
+        <p>
+          Explore my portfolio through this interactive 3D experience. Click on
+          the glowing hotspots to discover different sections of my work.
+        </p>
+
+        <div class="hotspot-info">
+          <h3>Hotspot Guide</h3>
+          <div class="hotspot-guide">
+            <div class="guide-item">
+              <div class="color-dot red-dot"></div>
+              <span>About Me & Skills</span>
+            </div>
+            <div class="guide-item">
+              <div class="color-dot green-dot"></div>
+              <span>Projects Showcase</span>
+            </div>
+            <div class="guide-item">
+              <div class="color-dot blue-dot"></div>
+              <span>Contact Information</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hotspot-counter">
+          <div class="counter-item">
+            <h3>3</h3>
+            <p>Hotspots</p>
+          </div>
+          <div class="counter-item">
+            <h3>12+</h3>
+            <p>Projects</p>
+          </div>
+          <div class="counter-item">
+            <h3>5★</h3>
+            <p>Experience</p>
+          </div>
+        </div>
       </div>
 
       <footer>
@@ -295,61 +397,9 @@
 
     <script>
       // Initialize Three.js
-      const container = document.getElementById("scene-container");
+      const container = document.querySelector(".model-container");
       const loadingIndicator = document.querySelector(".loading");
-      const infoPanel = document.getElementById("info-panel");
-      const panelTitle = document.getElementById("panel-title");
-      const panelContent = document.getElementById("panel-content");
-      const notification = document.getElementById("notification");
-      const sectionName = document.getElementById("section-name");
 
-      // Set initial panel content
-      const panelContents = {
-        about: `
-                <p>Welcome to my interactive portfolio! I'm a passionate 3D developer and designer with expertise in creating immersive web experiences.</p>
-                <p>With over 5 years of experience in Three.js and WebGL, I specialize in bringing complex 3D models to life in the browser.</p>
-                <p>My skills include:</p>
-                <ul style="padding-left: 20px; margin: 10px 0;">
-                    <li>Three.js & WebGL development</li>
-                    <li>3D modeling and optimization</li>
-                    <li>Interactive web design</li>
-                    <li>Performance optimization</li>
-                </ul>
-            `,
-        projects: `
-                <p>Here are some of my recent projects:</p>
-                <div style="margin-top: 20px;">
-                    <h3 style="color: #e52e71; margin-bottom: 5px;">E-Commerce 3D Viewer</h3>
-                    <p>Interactive product visualization for online retailers, increasing conversion rates by 35%.</p>
-                    
-                    <h3 style="color: #e52e71; margin: 15px 0 5px;">Architectural Visualization</h3>
-                    <p>Real-time 3D walkthroughs for real estate developers with VR compatibility.</p>
-                    
-                    <h3 style="color: #e52e71; margin: 15px 0 5px;">Educational Simulations</h3>
-                    <p>Interactive 3D models for STEM education used by schools and universities.</p>
-                </div>
-            `,
-        contact: `
-                <p>Let's work together! Reach out to me through any of these channels:</p>
-                <div style="margin-top: 20px;">
-                    <p><strong>Email:</strong> contact@myportfolio.com</p>
-                    <p><strong>LinkedIn:</strong> linkedin.com/in/myname</p>
-                    <p><strong>GitHub:</strong> github.com/myusername</p>
-                    <p><strong>Phone:</strong> +1 (555) 123-4567</p>
-                </div>
-                <div style="margin-top: 25px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px;">
-                    <h3 style="color: #e52e71; margin-bottom: 10px;">Send me a message</h3>
-                    <form>
-                        <input type="text" placeholder="Your Name" style="width: 100%; padding: 8px; margin-bottom: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; color: white;">
-                        <input type="email" placeholder="Your Email" style="width: 100%; padding: 8px; margin-bottom: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; color: white;">
-                        <textarea placeholder="Your Message" style="width: 100%; height: 80px; padding: 8px; margin-bottom: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; color: white;"></textarea>
-                        <button type="submit" style="background: #e52e71; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer;">Send Message</button>
-                    </form>
-                </div>
-            `,
-      };
-
-      // Scene setup
       const scene = new THREE.Scene();
       scene.background = new THREE.Color(0x111118);
 
@@ -359,7 +409,8 @@
         0.1,
         1000
       );
-      camera.position.set(0, 1, 8);
+      // Start with a closer view
+      camera.position.set(0, 1.5, 4);
 
       const renderer = new THREE.WebGLRenderer({
         antialias: true,
@@ -396,13 +447,13 @@
       const controls = new THREE.OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
       controls.dampingFactor = 0.05;
-      controls.minDistance = 4;
-      controls.maxDistance = 15;
+      controls.minDistance = 3; // Closer zoom
+      controls.maxDistance = 8; // Limit zoom out
       controls.enablePan = false;
 
       // Create hotspot markers
       function createHotspot(position, color, target) {
-        const geometry = new THREE.SphereGeometry(0.15, 16, 16);
+        const geometry = new THREE.SphereGeometry(0.2, 16, 16); // Slightly larger
         const material = new THREE.MeshBasicMaterial({
           color: color,
           transparent: true,
@@ -416,7 +467,7 @@
         let scale = 1;
         const animatePulse = () => {
           if (!sphere.userData.removed) {
-            scale = 0.9 + 0.1 * Math.sin(Date.now() * 0.002);
+            scale = 0.8 + 0.2 * Math.sin(Date.now() * 0.002);
             sphere.scale.set(scale, scale, scale);
             requestAnimationFrame(animatePulse);
           }
@@ -426,20 +477,20 @@
         return sphere;
       }
 
-      // Hotspot positions (adjusted for combi.glb model)
+      // Adjusted hotspot positions for better visibility
       const hotspots = [
         {
-          position: new THREE.Vector3(1.5, 1.8, 0.5),
+          position: new THREE.Vector3(1.2, 1.5, 0.8),
           color: 0xff3366,
           target: "about",
         },
         {
-          position: new THREE.Vector3(-1.2, 1.0, 1.2),
+          position: new THREE.Vector3(-0.8, 1.2, 1.0),
           color: 0x33cc33,
           target: "projects",
         },
         {
-          position: new THREE.Vector3(0.8, 0.5, -1.0),
+          position: new THREE.Vector3(0.5, 0.8, -1.2),
           color: 0x3399ff,
           target: "contact",
         },
@@ -455,6 +506,10 @@
           model = gltf.scene;
           scene.add(model);
 
+          // Scale and position model to fill more space
+          model.scale.set(1.5, 1.5, 1.5);
+          model.position.y = 1;
+
           // Add hotspots to the scene
           hotspots.forEach((hotspot) => {
             const marker = createHotspot(
@@ -469,9 +524,6 @@
           if (loadingIndicator.parentNode) {
             loadingIndicator.parentNode.removeChild(loadingIndicator);
           }
-
-          // Show welcome notification
-          showNotification("3D Portfolio Loaded!");
         },
         undefined,
         (error) => {
@@ -551,51 +603,12 @@
 
           // Check if we have a hotspot
           if (object.userData.target) {
-            navigateToSection(object.userData.target);
+            // Show alert for navigation
+            alert(`Navigating to ${object.userData.target} section`);
             break;
           }
         }
       }
-
-      // Navigation functions
-      function navigateToSection(section) {
-        // Update panel content
-        panelTitle.textContent =
-          section.charAt(0).toUpperCase() + section.slice(1);
-        panelContent.innerHTML = panelContents[section];
-
-        // Show panel
-        infoPanel.classList.add("active");
-
-        // Show notification
-        sectionName.textContent = section;
-        showNotification();
-      }
-
-      function showNotification(text) {
-        if (text) {
-          notification.textContent = text;
-        }
-
-        notification.classList.add("show");
-
-        setTimeout(() => {
-          notification.classList.remove("show");
-        }, 3000);
-      }
-
-      // Close panel button
-      document.querySelector(".close-btn").addEventListener("click", () => {
-        infoPanel.classList.remove("active");
-      });
-
-      // Navigation links
-      document.querySelectorAll(".nav-link").forEach((link) => {
-        link.addEventListener("click", (e) => {
-          e.preventDefault();
-          navigateToSection(link.dataset.section);
-        });
-      });
 
       // Event listeners
       renderer.domElement.addEventListener("mousemove", onMouseMove);
