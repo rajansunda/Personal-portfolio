@@ -3,116 +3,1007 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>3D Computer Model</title>
-    <link rel="stylesheet" href="style.css" />
+    <title>3D Interactive Portfolio</title>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.min.js"></script>
     <style>
-      body,
-      html {
+      * {
         margin: 0;
         padding: 0;
+        box-sizing: border-box;
+      }
+
+      body,
+      html {
+        height: 100%;
         overflow: hidden;
-        background: #111;
+        background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        color: #fff;
+      }
+
+      .container {
+        position: relative;
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      header {
+        background: rgba(0, 0, 0, 0.7);
+        padding: 15px 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        z-index: 100;
+      }
+
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .back-btn {
+        background: linear-gradient(45deg, #ff8a00, #e52e71);
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 30px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 15px rgba(229, 46, 113, 0.3);
+      }
+
+      .back-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(229, 46, 113, 0.5);
+      }
+
+      .logo {
+        font-size: 28px;
+        font-weight: 700;
+        background: linear-gradient(90deg, #ff8a00, #e52e71);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: 1px;
+      }
+
+      nav ul {
+        display: flex;
+        list-style: none;
+        gap: 25px;
+      }
+
+      nav a {
+        color: #ddd;
+        text-decoration: none;
+        font-weight: 500;
+        padding: 8px 15px;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+        font-size: 18px;
+        position: relative;
+      }
+
+      nav a:hover {
+        color: #fff;
+      }
+
+      nav a::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #ff8a00, #e52e71);
+        transition: width 0.3s ease;
+      }
+
+      nav a:hover::after {
+        width: 100%;
+      }
+
+      .model-container {
+        position: relative;
+        flex: 1;
+        height: calc(100vh - 120px);
+        border-radius: 0;
+        overflow: hidden;
+        background: rgba(0, 0, 0, 0.3);
+      }
+
+      .info-panel {
+        position: absolute;
+        top: 100px;
+        right: 20px;
+        width: 340px;
+        background: rgba(0, 0, 0, 0.85);
+        padding: 25px;
+        border-radius: 12px;
+        border-left: 4px solid #e52e71;
+        backdrop-filter: blur(10px);
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        z-index: 50;
+      }
+
+      .info-panel h2 {
+        font-size: 32px;
+        margin-bottom: 20px;
+        color: #e52e71;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 10px;
+      }
+
+      .info-panel p {
+        line-height: 1.7;
+        margin-bottom: 20px;
+        color: #ddd;
+        font-size: 17px;
+      }
+
+      .hotspot-info {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 15px;
+      }
+
+      .hotspot-info h3 {
+        color: #ff8a00;
+        margin-bottom: 10px;
+        font-size: 20px;
       }
 
       canvas {
         display: block;
-      }
-
-      #three-canvas {
-        position: fixed;
+        position: absolute;
         top: 0;
         left: 0;
-        width: 100vw;
-        height: 100vh;
-        z-index: 1;
+        width: 100%;
+        height: 100%;
       }
 
-      .back-button {
-        position: fixed;
-        top: 20px;
-        left: 20px;
-        z-index: 10;
-        background: rgba(76, 201, 240, 0.8);
-        color: #000;
+      .loading {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 24px;
+        z-index: 5;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 20px 40px;
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top: 5px solid #e52e71;
+        animation: spin 1s linear infinite;
+        margin-bottom: 20px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .hotspot-label {
+        position: absolute;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
         padding: 10px 20px;
         border-radius: 30px;
-        text-decoration: none;
+        font-size: 16px;
+        pointer-events: none;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.3s ease;
+        z-index: 20;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         font-weight: 500;
-        transition: 0.3s ease;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
       }
 
-      .back-button:hover {
-        background: #3b82f6;
-        color: #fff;
+      .controls {
+        position: absolute;
+        bottom: 90px;
+        left: 20px;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 15px 20px;
+        border-radius: 10px;
+        z-index: 10;
+        font-size: 16px;
+      }
+
+      .controls p {
+        margin-bottom: 10px;
+        color: #aaa;
+      }
+
+      footer {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 15px;
+        text-align: center;
+        font-size: 16px;
+        color: #aaa;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        z-index: 10;
+      }
+
+      .hotspot-counter {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+      }
+
+      .counter-item {
+        flex: 1;
+        text-align: center;
+        padding: 15px 10px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        transition: all 0.3s ease;
+      }
+
+      .counter-item:hover {
+        background: rgba(229, 46, 113, 0.2);
+        transform: translateY(-5px);
+      }
+
+      .counter-item h3 {
+        font-size: 24px;
+        color: #ff8a00;
+        margin-bottom: 5px;
+      }
+
+      .counter-item p {
+        font-size: 14px;
+        color: #ddd;
+        margin: 0;
+      }
+
+      .hotspot-guide {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .guide-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .color-dot {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+      }
+
+      .red-dot {
+        background: #ff3366;
+      }
+      .green-dot {
+        background: #33cc33;
+      }
+      .blue-dot {
+        background: #3399ff;
+      }
+
+      /* Modal Styles */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(5px);
+      }
+
+      .modal-content {
+        background: linear-gradient(135deg, #1a1a2e, #16213e);
+        margin: 5% auto;
+        padding: 0;
+        border-radius: 15px;
+        width: 80%;
+        max-width: 800px;
+        max-height: 85vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .modal-header {
+        background: linear-gradient(45deg, #ff8a00, #e52e71);
+        padding: 20px 30px;
+        border-radius: 15px 15px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .modal-header h2 {
+        color: white;
+        font-size: 28px;
+        margin: 0;
+      }
+
+      .close {
+        color: white;
+        font-size: 32px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .close:hover {
+        transform: scale(1.1);
+      }
+
+      .modal-body {
+        padding: 30px;
+        color: #ddd;
+        line-height: 1.6;
+      }
+
+      .modal-body h3 {
+        color: #ff8a00;
+        margin-top: 25px;
+        margin-bottom: 15px;
+        font-size: 22px;
+      }
+
+      .modal-body h4 {
+        color: #e52e71;
+        margin-top: 20px;
+        margin-bottom: 10px;
+        font-size: 18px;
+      }
+
+      .modal-body p {
+        margin-bottom: 15px;
+        font-size: 16px;
+      }
+
+      .modal-body ul {
+        margin-left: 20px;
+        margin-bottom: 15px;
+      }
+
+      .modal-body li {
+        margin-bottom: 8px;
+        font-size: 16px;
+      }
+
+      .project-item {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        border-left: 4px solid #ff8a00;
+      }
+
+      .project-item h4 {
+        color: #ff8a00;
+        margin-top: 0;
+        margin-bottom: 10px;
+      }
+
+      .skill-category {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+      }
+
+      .skill-category h4 {
+        color: #e52e71;
+        margin-top: 0;
+        margin-bottom: 10px;
+      }
+
+      .contact-info {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+      }
+
+      .contact-info h4 {
+        color: #ff8a00;
+        margin-top: 0;
+        margin-bottom: 15px;
+      }
+
+      .contact-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        gap: 10px;
+      }
+
+      .contact-item strong {
+        color: #e52e71;
+        min-width: 80px;
       }
     </style>
   </head>
   <body>
-    <a href="index.html" class="back-button">← Back to Portfolio</a>
-    <div id="three-canvas"></div>
+    <div class="container">
+      <header>
+        <div class="header-left">
+          <button class="back-btn" onclick="window.location.href='index.html'">
+            ← Back to Portfolio
+          </button>
+          <div class="logo">3D PORTFOLIO</div>
+        </div>
+        <nav>
+          <ul>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Projects</a></li>
+            <li><a href="#">Contact</a></li>
+          </ul>
+        </nav>
+      </header>
 
-    <script type="module">
-      import * as THREE from "https://unpkg.com/three@0.152.2/build/three.module.js";
-      import { GLTFLoader } from "https://unpkg.com/three@0.152.2/examples/jsm/loaders/GLTFLoader.js";
-      import { OrbitControls } from "https://unpkg.com/three@0.152.2/examples/jsm/controls/OrbitControls.js";
+      <div class="model-container">
+        <div class="loading">
+          <div class="loading-spinner"></div>
+          <p>Loading 3D Experience...</p>
+        </div>
+        <div class="controls">
+          <p>← → ↑ ↓ : Rotate Model</p>
+          <p>Mouse Wheel : Zoom In/Out</p>
+        </div>
+      </div>
+
+      <div class="info-panel">
+        <h2>Interactive 3D Showcase</h2>
+        <p>
+          Explore my portfolio through this interactive 3D experience. Click on
+          the glowing hotspots to discover different sections of my work.
+        </p>
+
+        <div class="hotspot-info">
+          <h3>Hotspot Guide</h3>
+          <div class="hotspot-guide">
+            <div class="guide-item">
+              <div class="color-dot red-dot"></div>
+              <span>About Me & Skills</span>
+            </div>
+            <div class="guide-item">
+              <div class="color-dot green-dot"></div>
+              <span>Projects Showcase</span>
+            </div>
+            <div class="guide-item">
+              <div class="color-dot blue-dot"></div>
+              <span>Contact Information</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hotspot-counter">
+          <div class="counter-item">
+            <h3>3</h3>
+            <p>Hotspots</p>
+          </div>
+          <div class="counter-item">
+            <h3>10+</h3>
+            <p>Projects</p>
+          </div>
+          <div class="counter-item">
+            <h3>5★</h3>
+            <p>Experience</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- About Modal -->
+      <div id="aboutModal" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>About Me & Skills</h2>
+            <span class="close" onclick="closeModal('aboutModal')"
+              >&times;</span
+            >
+          </div>
+          <div class="modal-body">
+            <h3>Professional Summary</h3>
+            <p>
+              I am a Computer Science graduate from Kingston University with a
+              2.1 (Upper Second Class) degree. I enjoy working in collaborative,
+              fast-paced teams where technology is used to solve practical
+              problems. With experience in full-stack development, agile
+              methods, and collaborating directly with clients, I have built a
+              range of user-friendly digital solutions. I am particularly
+              interested in combining technical skills with creativity to
+              deliver reliable, effective software.
+            </p>
+
+            <h3>Education</h3>
+            <h4>BSc (Hons) Computer Science</h4>
+            <p><strong>Kingston University</strong> | Sep 2021 – Jun 2025</p>
+            <p>
+              Key Modules: Mobile Application Development (React Native, Kotlin,
+              Android Studio), User Experience Design, Digital Entrepreneurship
+            </p>
+
+            <h4>Level 3 – Software Developer Technician</h4>
+            <p>
+              <strong>BCS, The Chartered Institute for IT</strong> | Jan 2020 –
+              Pass
+            </p>
+
+            <h3>Technical Skills</h3>
+            <div class="skill-category">
+              <h4>Languages & Frameworks</h4>
+              <p>
+                JavaScript, React Native, Node.js, Kotlin, C#, ASP.NET, SQL,
+                HTML, CSS
+              </p>
+            </div>
+            <div class="skill-category">
+              <h4>Tools & Platforms</h4>
+              <p>
+                Visual Studio Code, Android Studio, Firebase, Postman, MySQL
+              </p>
+            </div>
+            <div class="skill-category">
+              <h4>Design & Collaboration</h4>
+              <p>Figma, Adobe XD, Jira, Git, Agile, SCRUM</p>
+            </div>
+
+            <h3>Languages</h3>
+            <p>English (Native), German (Proficient)</p>
+
+            <h3>Interests</h3>
+            <p>Jiu-Jitsu, Water Polo, Swimming, Road Cycling</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Projects Modal -->
+      <div id="projectsModal" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>Projects Showcase</h2>
+            <span class="close" onclick="closeModal('projectsModal')"
+              >&times;</span
+            >
+          </div>
+          <div class="modal-body">
+            <div class="project-item">
+              <h4>MyKneeRecovery App</h4>
+              <p><strong>Final Year Project</strong></p>
+              <p>
+                Designed and developed a mobile health application using React
+                Native and Node.js to support recovery from knee injuries.
+                Features include onboarding, personalised exercise plans, and
+                dynamic recovery charts. Demonstrates full-stack proficiency and
+                a user-centered design approach.
+              </p>
+            </div>
+
+            <div class="project-item">
+              <h4>Stay Safe App</h4>
+              <p>
+                Co-developed a cross-platform app using React Native for
+                real-time location sharing, emergency contact management, and
+                activity tracking. Integrated profile personalisation features
+                to enhance safety and usability.
+              </p>
+            </div>
+
+            <div class="project-item">
+              <h4>Book Manager App</h4>
+              <p>
+                Created a Kotlin-based Android app to manage book records with
+                CRUD functionality and SQLite integration. Implemented a clean,
+                modern UI focused on user experience.
+              </p>
+            </div>
+
+            <h3>Professional Experience</h3>
+            <div class="project-item">
+              <h4>Software Developer Apprentice / Junior Developer</h4>
+              <p><strong>Ashbury Click</strong> | 2018 – 2021</p>
+              <ul>
+                <li>
+                  Delivered software solutions for clients including Amazon, EY,
+                  and ALDI
+                </li>
+                <li>
+                  Built internal and client-facing apps using C#, ASP.NET, SQL,
+                  HTML, and CSS
+                </li>
+                <li>
+                  Developed a task management tool with automated workflows to
+                  enhance productivity
+                </li>
+                <li>
+                  Led client meetings and implemented SQL-based reporting
+                  systems
+                </li>
+                <li>
+                  Actively participated in Agile SCRUM ceremonies and progressed
+                  from apprentice to Junior Developer
+                </li>
+              </ul>
+            </div>
+
+            <div class="project-item">
+              <h4>Software/Technical Stream</h4>
+              <p><strong>Cisco</strong> | Jul 2016</p>
+              <p>
+                Explored software development and networking fundamentals, with
+                hands-on experience in device security and systems architecture.
+              </p>
+            </div>
+
+            <div class="project-item">
+              <h4>Upstream Engineering</h4>
+              <p><strong>BP</strong> | Jul 2015</p>
+              <p>
+                Collaborated with international teams on a Silver Crest Award
+                project, enhancing skills in virtual teamwork and engineering
+                communication.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Modal -->
+      <div id="contactModal" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>Contact Information</h2>
+            <span class="close" onclick="closeModal('contactModal')"
+              >&times;</span
+            >
+          </div>
+          <div class="modal-body">
+            <div class="contact-info">
+              <h4>Get In Touch</h4>
+              <div class="contact-item">
+                <strong>Email:</strong>
+                <span>rajansunda@yahoo.co.uk</span>
+              </div>
+              <div class="contact-item">
+                <strong>Phone:</strong>
+                <span>07388864418</span>
+              </div>
+              <div class="contact-item">
+                <strong>Location:</strong>
+                <span>London, UB2 4HP</span>
+              </div>
+              <div class="contact-item">
+                <strong>GitHub:</strong>
+                <span
+                  ><a
+                    href="https://github.com/rajansunda"
+                    target="_blank"
+                    style="color: #ff8a00"
+                    >github.com/rajansunda</a
+                  ></span
+                >
+              </div>
+            </div>
+
+            <h3>Let's Connect</h3>
+            <p>
+              I'm always interested in discussing new opportunities,
+              collaborations, or projects. Feel free to reach out through any of
+              the channels above.
+            </p>
+
+            <p>
+              Whether you're looking for a developer who can work across the
+              full stack, someone with experience in mobile app development, or
+              a team player who thrives in agile environments, I'd love to hear
+              from you.
+            </p>
+
+            <h3>Availability</h3>
+            <p>Currently available for:</p>
+            <ul>
+              <li>Full-time software development roles</li>
+              <li>Freelance projects</li>
+              <li>Collaborative development opportunities</li>
+              <li>Technical consulting</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        &copy; 2023 Interactive 3D Portfolio | Created with Three.js
+      </footer>
+    </div>
+
+    <script>
+      // Modal functions
+      function openModal(modalId) {
+        document.getElementById(modalId).style.display = "block";
+      }
+
+      function closeModal(modalId) {
+        document.getElementById(modalId).style.display = "none";
+      }
+
+      // Close modal when clicking outside
+      window.onclick = function (event) {
+        const modals = document.getElementsByClassName("modal");
+        for (let i = 0; i < modals.length; i++) {
+          if (event.target === modals[i]) {
+            modals[i].style.display = "none";
+          }
+        }
+      };
+
+      // Initialize Three.js
+      const container = document.querySelector(".model-container");
+      const loadingIndicator = document.querySelector(".loading");
 
       const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x111118);
+
       const camera = new THREE.PerspectiveCamera(
-        60,
-        window.innerWidth / window.innerHeight,
+        45,
+        container.clientWidth / container.clientHeight,
         0.1,
         1000
       );
-      camera.position.set(2, 1.5, 3);
+      // Start with a closer view
+      camera.position.set(0, 1.5, 4);
 
-      const renderer = new THREE.WebGLRenderer({ antialias: true });
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      const renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: false,
+      });
+      renderer.setSize(container.clientWidth, container.clientHeight);
       renderer.setPixelRatio(window.devicePixelRatio);
-      document.getElementById("three-canvas").appendChild(renderer.domElement);
+      container.appendChild(renderer.domElement);
 
-      const controls = new OrbitControls(camera, renderer.domElement);
-      controls.enableDamping = true;
-
+      // Add lighting
       const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
       scene.add(ambientLight);
 
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-      directionalLight.position.set(5, 10, 7.5);
-      scene.add(directionalLight);
+      const directionalLight1 = new THREE.DirectionalLight(0xffffff, 0.8);
+      directionalLight1.position.set(3, 5, 2);
+      scene.add(directionalLight1);
 
-      const loader = new GLTFLoader();
+      const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.4);
+      directionalLight2.position.set(-3, -2, -4);
+      scene.add(directionalLight2);
+
+      const hemisphereLight = new THREE.HemisphereLight(
+        0xffffbb,
+        0x080820,
+        0.4
+      );
+      scene.add(hemisphereLight);
+
+      // Add grid and axes helpers
+      const gridHelper = new THREE.GridHelper(20, 20, 0x444444, 0x222222);
+      scene.add(gridHelper);
+
+      // Add orbit controls
+      const controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.minDistance = 3; // Closer zoom
+      controls.maxDistance = 8; // Limit zoom out
+      controls.enablePan = false;
+
+      // Create hotspot markers
+      function createHotspot(position, color, target) {
+        const geometry = new THREE.SphereGeometry(0.2, 16, 16); // Slightly larger
+        const material = new THREE.MeshBasicMaterial({
+          color: color,
+          transparent: true,
+          opacity: 0.8,
+        });
+        const sphere = new THREE.Mesh(geometry, material);
+        sphere.position.copy(position);
+        sphere.userData = { target: target };
+
+        // Add pulsing animation
+        let scale = 1;
+        const animatePulse = () => {
+          if (!sphere.userData.removed) {
+            scale = 0.8 + 0.2 * Math.sin(Date.now() * 0.002);
+            sphere.scale.set(scale, scale, scale);
+            requestAnimationFrame(animatePulse);
+          }
+        };
+        animatePulse();
+
+        return sphere;
+      }
+
+      // Adjusted hotspot positions for better visibility
+      const hotspots = [
+        {
+          position: new THREE.Vector3(1.2, 1.5, 0.8),
+          color: 0xff3366,
+          target: "about",
+        },
+        {
+          position: new THREE.Vector3(-0.8, 1.2, 1.0),
+          color: 0x33cc33,
+          target: "projects",
+        },
+        {
+          position: new THREE.Vector3(0.5, 0.8, -1.2),
+          color: 0x3399ff,
+          target: "contact",
+        },
+      ];
+
+      // Load GLB model
+      const loader = new THREE.GLTFLoader();
+      let model;
+
       loader.load(
-        "models/combi.glb", // path to your model file
+        "models/combi.glb",
         (gltf) => {
-          console.log("Model loaded successfully");
-          const model = gltf.scene;
-          model.scale.set(1.5, 1.5, 1.5);
+          model = gltf.scene;
           scene.add(model);
+
+          // Scale and position model to fill more space
+          model.scale.set(1.5, 1.5, 1.5);
+          model.position.y = 0.55;
+
+          // Add hotspots to the scene
+          hotspots.forEach((hotspot) => {
+            const marker = createHotspot(
+              hotspot.position,
+              hotspot.color,
+              hotspot.target
+            );
+            scene.add(marker);
+          });
+
+          // Remove loading indicator
+          if (loadingIndicator.parentNode) {
+            loadingIndicator.parentNode.removeChild(loadingIndicator);
+          }
         },
-        (xhr) => {
-          console.log(
-            `Model loading: ${(xhr.loaded / xhr.total) * 100}% loaded`
-          );
-        },
+        undefined,
         (error) => {
           console.error("Error loading model:", error);
+          loadingIndicator.textContent = "Error loading model. Check console.";
         }
       );
 
+      // Handle window resize
+      window.addEventListener("resize", () => {
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+      });
+
+      // Raycasting for hotspot interaction
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+
+      function onMouseMove(event) {
+        // Calculate mouse position in normalized device coordinates
+        const rect = renderer.domElement.getBoundingClientRect();
+        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+        // Update the picking ray with the camera and mouse position
+        raycaster.setFromCamera(mouse, camera);
+
+        // Remove any existing labels
+        document
+          .querySelectorAll(".hotspot-label")
+          .forEach((el) => el.remove());
+
+        // Calculate objects intersecting the picking ray
+        const intersects = raycaster.intersectObjects(scene.children);
+
+        for (let i = 0; i < intersects.length; i++) {
+          const object = intersects[i].object;
+
+          // Check if we have a hotspot
+          if (object.userData.target) {
+            // Get screen position of hotspot
+            const vector = object.position.clone();
+            vector.project(camera);
+
+            const x = (vector.x * 0.5 + 0.5) * container.clientWidth;
+            const y = (-vector.y * 0.5 + 0.5) * container.clientHeight;
+
+            // Create label
+            const label = document.createElement("div");
+            label.className = "hotspot-label";
+            label.textContent = object.userData.target.toUpperCase();
+            label.style.left = x + "px";
+            label.style.top = y - 40 + "px";
+            container.appendChild(label);
+
+            // Animate label appearance
+            setTimeout(() => {
+              label.style.opacity = "1";
+              label.style.transform = "translateY(0)";
+            }, 10);
+
+            break;
+          }
+        }
+      }
+
+      function onMouseClick(event) {
+        // Update the picking ray with the camera and mouse position
+        raycaster.setFromCamera(mouse, camera);
+
+        // Calculate objects intersecting the picking ray
+        const intersects = raycaster.intersectObjects(scene.children);
+
+        for (let i = 0; i < intersects.length; i++) {
+          const object = intersects[i].object;
+
+          // Check if we have a hotspot
+          if (object.userData.target) {
+            // Show alert for navigation
+            alert(`Navigating to ${object.userData.target} section`);
+            break;
+          }
+        }
+      }
+
+      // Event listeners
+      renderer.domElement.addEventListener("mousemove", onMouseMove);
+      renderer.domElement.addEventListener("click", onMouseClick);
+
+      // Animation loop
       function animate() {
         requestAnimationFrame(animate);
+
+        // Rotate model slowly
+        if (model) {
+          model.rotation.y += 0.002;
+        }
+
         controls.update();
         renderer.render(scene, camera);
       }
-
       animate();
-
-      window.addEventListener("resize", () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      });
     </script>
   </body>
 </html>

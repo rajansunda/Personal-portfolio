@@ -3,12 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Rajan Sunda - Interactive Portfolio</title>
+    <title>Ancient Maze Explorer - Enhanced Experience</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <style>
+      /* Base styles */
       * {
         margin: 0;
         padding: 0;
@@ -143,7 +144,7 @@
       /* Section Info Panel */
       .section-info {
         position: absolute;
-        top: 50%;
+        top: 40%;
         left: 30px;
         transform: translateY(-50%);
         background: rgba(30, 40, 80, 0.9);
@@ -153,7 +154,7 @@
         border: 1px solid rgba(76, 201, 240, 0.3);
         max-width: 400px;
         pointer-events: auto;
-        opacity: 0;
+        opacity: 1;
         transition: all 0.3s ease;
       }
 
@@ -194,13 +195,15 @@
         font-weight: 600;
         transition: transform 0.3s;
         margin: 5px;
+        border: none;
+        cursor: pointer;
       }
 
       .btn:hover {
         transform: translateY(-2px);
       }
 
-      /* Zone Labels - Enhanced */
+      /* Zone Labels */
       .zone-label {
         position: absolute;
         background: rgba(76, 201, 240, 0.9);
@@ -425,6 +428,290 @@
         user-select: none;
       }
 
+      /* Maze-specific styles */
+      .torch-icon {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        color: #ff9a00;
+        font-size: 24px;
+        text-shadow: 0 0 10px #ff6a00;
+        z-index: 20;
+        opacity: 0;
+        transition: opacity 0.5s;
+      }
+
+      .torch-icon.active {
+        opacity: 1;
+      }
+
+      .victory-panel {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(10, 20, 40, 0.95);
+        padding: 30px;
+        border-radius: 15px;
+        text-align: center;
+        z-index: 100;
+        width: 80%;
+        max-width: 500px;
+        display: none;
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(76, 201, 240, 0.5);
+        box-shadow: 0 0 30px rgba(76, 201, 240, 0.5);
+      }
+
+      .victory-panel h2 {
+        color: #4cc9f0;
+        font-size: 2rem;
+        margin-bottom: 20px;
+      }
+
+      .victory-panel p {
+        color: #e0e0e0;
+        margin-bottom: 25px;
+        line-height: 1.6;
+      }
+
+      .victory-panel .btn {
+        font-size: 1.1rem;
+        padding: 12px 30px;
+      }
+
+      .riddle-input {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(76, 201, 240, 0.3);
+        border-radius: 25px;
+        padding: 10px 15px;
+        color: white;
+        width: 100%;
+        margin-bottom: 15px;
+        text-align: center;
+        font-size: 1rem;
+      }
+
+      .riddle-input:focus {
+        outline: none;
+        border-color: #4cc9f0;
+      }
+
+      .power-up {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        z-index: 5;
+        animation: pulse 1.5s infinite;
+      }
+
+      .power-up.key {
+        background: radial-gradient(circle, #ffd700, #daa520);
+        box-shadow: 0 0 15px #ffd700;
+      }
+
+      .power-up.map {
+        background: radial-gradient(circle, #7fffd4, #20b2aa);
+        box-shadow: 0 0 15px #7fffd4;
+      }
+
+      .power-up.torch {
+        background: radial-gradient(circle, #ff8c00, #ff4500);
+        box-shadow: 0 0 15px #ff8c00;
+      }
+
+      /* Movement Indicator */
+      .movement-indicator {
+        position: absolute;
+        bottom: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(30, 40, 80, 0.8);
+        padding: 10px 20px;
+        border-radius: 20px;
+        color: #e0e0e0;
+        font-size: 0.9rem;
+        text-align: center;
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(76, 201, 240, 0.3);
+        pointer-events: none;
+        opacity: 0.8;
+      }
+
+      /* NEW FEATURES */
+
+      /* Compass */
+      .compass {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        width: 100px;
+        height: 100px;
+        background: rgba(30, 40, 80, 0.8);
+        border-radius: 50%;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(76, 201, 240, 0.3);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 20;
+      }
+
+      .compass-needle {
+        position: absolute;
+        width: 4px;
+        height: 40px;
+        background: #ff3333;
+        transform-origin: bottom;
+        bottom: 50%;
+        border-radius: 2px;
+      }
+
+      .directions {
+        position: relative;
+        width: 90%;
+        height: 90%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      .directions span {
+        position: absolute;
+      }
+
+      .directions .n {
+        top: 0;
+      }
+      .directions .e {
+        right: 0;
+      }
+      .directions .s {
+        bottom: 0;
+      }
+      .directions .w {
+        left: 0;
+      }
+
+      /* Sound Toggle */
+      .sound-toggle {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        width: 40px;
+        height: 40px;
+        background: rgba(30, 40, 80, 0.8);
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        pointer-events: auto;
+        z-index: 20;
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(76, 201, 240, 0.3);
+      }
+
+      .sound-toggle i {
+        font-size: 1.2rem;
+        color: #4cc9f0;
+      }
+
+      /* Health Bar */
+      .health-bar-container {
+        position: absolute;
+        top: 80px;
+        left: 30px;
+        width: 150px;
+        height: 20px;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid rgba(76, 201, 240, 0.3);
+        pointer-events: none;
+      }
+
+      .health-bar {
+        height: 100%;
+        width: 100%;
+        background: linear-gradient(90deg, #ff0000, #ff9900, #00ff00);
+        transition: width 0.3s;
+      }
+
+      .health-label {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 0.7rem;
+        font-weight: bold;
+        color: white;
+        text-shadow: 0 0 2px black;
+      }
+
+      /* Footsteps Effect */
+      .footsteps {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        background: rgba(76, 201, 240, 0.7);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 3;
+        opacity: 0;
+      }
+
+      /* Obstacle Warning */
+      .obstacle-warning {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(255, 0, 0, 0.7);
+        padding: 15px 30px;
+        border-radius: 10px;
+        color: white;
+        font-weight: bold;
+        opacity: 0;
+        transition: opacity 0.3s;
+        pointer-events: none;
+        z-index: 20;
+      }
+      /* NEW: Portfolio Button */
+      .portfolio-button {
+        position: absolute;
+        top: 20px;
+        left: 70px; /* Positioned to the right of sound toggle */
+        background: rgba(30, 40, 80, 0.8);
+        padding: 10px 15px;
+        border-radius: 25px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        pointer-events: auto;
+        z-index: 20;
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(76, 201, 240, 0.3);
+        color: #4cc9f0;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+      }
+
+      .portfolio-button i {
+        margin-right: 8px;
+        font-size: 1rem;
+      }
+
+      .portfolio-button:hover {
+        background: rgba(76, 201, 240, 0.5);
+        transform: translateY(-2px);
+        box-shadow: 0 0 15px rgba(76, 201, 240, 0.5);
+      }
       /* Responsive Design */
       @media (max-width: 768px) {
         .header {
@@ -436,6 +723,13 @@
           font-size: 1.5rem;
         }
 
+        /* NEW: Portfolio button mobile positioning */
+        .portfolio-button {
+          top: 80px;
+          left: 60px;
+          padding: 8px 12px;
+          font-size: 0.8rem;
+        }
         .controls {
           bottom: 20px;
           right: 20px;
@@ -461,40 +755,54 @@
         .progress-indicator {
           display: none;
         }
+
+        .movement-indicator {
+          bottom: 150px;
+          font-size: 0.8rem;
+        }
+
+        /* New features */
+        .compass {
+          top: 80px;
+          width: 80px;
+          height: 80px;
+        }
+
+        .sound-toggle {
+          top: 80px;
+          left: 10px;
+        }
       }
     </style>
   </head>
   <body>
-    <a href="index.html" class="back-button">← Back to Portfolio</a>
-
-    <style>
-      .back-button {
-        position: fixed;
-        top: 20px;
-        left: 20px;
-        z-index: 20;
-        background: rgba(76, 201, 240, 0.8);
-        color: #000;
-        padding: 10px 20px;
-        border-radius: 30px;
-        text-decoration: none;
-        font-weight: 500;
-        transition: 0.3s ease;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-      }
-
-      .back-button:hover {
-        background: #3b82f6;
-        color: #fff;
-      }
-    </style>
     <!-- Loading Screen -->
     <div class="loading-screen" id="loadingScreen">
       <div class="spinner"></div>
       <div class="loading-text">
-        <p>Loading Interactive Portfolio...</p>
-        <p style="font-size: 0.9rem; margin-top: 10px">Get ready to explore!</p>
+        <p>Loading Ancient Maze Explorer...</p>
+        <p style="font-size: 0.9rem; margin-top: 10px">
+          Preparing your character...
+        </p>
       </div>
+    </div>
+
+    <!-- Torch indicator -->
+    <div class="torch-icon" id="torchIcon">
+      <i class="fas fa-fire"></i>
+    </div>
+
+    <!-- Victory Panel -->
+    <div class="victory-panel" id="victoryPanel">
+      <h2>Congratulations, Explorer!</h2>
+      <p>
+        You have successfully navigated the ancient maze and collected all the
+        sacred artifacts!
+      </p>
+      <p>
+        The temple guardians grant you safe passage back to the world above.
+      </p>
+      <button class="btn" id="victoryBtn">Return to Surface</button>
     </div>
 
     <!-- 3D Canvas -->
@@ -502,10 +810,43 @@
 
     <!-- UI Overlay -->
     <div class="ui-overlay">
+      <!-- NEW: Sound Toggle -->
+      <div class="sound-toggle" id="soundToggle">
+        <i class="fas fa-volume-up"></i>
+      </div>
+
+      <!-- NEW: Portfolio Button -->
+      <div class="portfolio-button" id="portfolioButton">
+        <i class="fas fa-arrow-left"></i> Portfolio
+      </div>
+
+      <!-- NEW: Health Bar -->
+      <div class="health-bar-container">
+        <div class="health-bar" id="healthBar" style="width: 100%">
+          <div class="health-label">HEALTH</div>
+        </div>
+      </div>
+
+      <!-- NEW: Compass -->
+      <div class="compass">
+        <div class="compass-needle" id="compassNeedle"></div>
+        <div class="directions">
+          <span class="n">N</span>
+          <span class="e">E</span>
+          <span class="s">S</span>
+          <span class="w">W</span>
+        </div>
+      </div>
+
+      <!-- NEW: Obstacle Warning -->
+      <div class="obstacle-warning" id="obstacleWarning">
+        <i class="fas fa-exclamation-triangle"></i> Obstacle Ahead!
+      </div>
+
       <!-- Header -->
       <div class="header">
-        <h1>Rajan Sunda</h1>
-        <p>Interactive Software Developer Portfolio</p>
+        <h1>Ancient Maze Explorer</h1>
+        <p>Navigate the forgotten temple maze</p>
       </div>
 
       <!-- Controls -->
@@ -518,13 +859,18 @@
           <div class="key d">D</div>
         </div>
         <div class="instruction">
-          Walk to different zones to explore my work!
+          Collect artifacts and solve riddles to escape!
         </div>
+      </div>
+
+      <!-- Movement Indicator -->
+      <div class="movement-indicator">
+        <i class="fas fa-arrows-alt"></i> Use A/D to turn left/right
       </div>
 
       <!-- Mini-map -->
       <div class="minimap">
-        <div class="minimap-title">Portfolio Map</div>
+        <div class="minimap-title">Maze Map</div>
         <div class="minimap-content" id="minimapContent">
           <div class="minimap-player" id="minimapPlayer"></div>
         </div>
@@ -532,82 +878,115 @@
 
       <!-- Progress Indicator -->
       <div class="progress-indicator">
-        <div class="progress-title">Exploration Progress</div>
+        <div class="progress-title">Artifacts Collected</div>
         <ul class="progress-list" id="progressList">
-          <li class="progress-item" id="progress-about">
+          <li class="progress-item" id="progress-temple">
             <div class="icon"></div>
-            <span>About Me</span>
+            <span>Temple Map</span>
           </li>
-          <li class="progress-item" id="progress-services">
+          <li class="progress-item" id="progress-forest">
             <div class="icon"></div>
-            <span>Services</span>
+            <span>Forest Key</span>
           </li>
-          <li class="progress-item" id="progress-projects">
+          <li class="progress-item" id="progress-cave">
             <div class="icon"></div>
-            <span>Projects</span>
+            <span>Cave Torch</span>
           </li>
-          <li class="progress-item" id="progress-skills">
+          <li class="progress-item" id="progress-lake">
             <div class="icon"></div>
-            <span>Skills</span>
-          </li>
-          <li class="progress-item" id="progress-contact">
-            <div class="icon"></div>
-            <span>Contact</span>
+            <span>Lake Riddle</span>
           </li>
         </ul>
       </div>
 
       <!-- Distance Indicator -->
       <div class="distance-indicator" id="distanceIndicator">
-        Distance to nearest zone: <span id="distanceValue">0</span>m
+        Distance to nearest artifact: <span id="distanceValue">0</span>m
       </div>
 
       <!-- Section Info Panel -->
-      <div class="section-info" id="sectionInfo">
-        <h2 id="sectionTitle">Welcome!</h2>
+      <div class="section-info active" id="sectionInfo">
+        <h2 id="sectionTitle">Welcome, Explorer!</h2>
         <div id="sectionContent">
           <p>
-            Move around the 3D space to explore different sections of my
-            portfolio. Each zone contains information about my skills, projects,
-            and experience.
+            You've discovered an ancient temple maze filled with secrets and
+            challenges. Navigate through different zones to collect artifacts
+            and solve riddles.
           </p>
-          <p>Use WASD keys to move your character around!</p>
+          <p>Use WASD keys to move and turn your character through the maze.</p>
+          <p>Find all artifacts to unlock the exit!</p>
         </div>
       </div>
 
       <!-- Zone Labels -->
-      <div class="zone-label" id="aboutLabel">
-        <i class="fas fa-user"></i> About Me
+      <div class="zone-label" id="templeLabel">
+        <i class="fas fa-map"></i> Temple Ruins
       </div>
-      <div class="zone-label" id="servicesLabel">
-        <i class="fas fa-cogs"></i> Services
+      <div class="zone-label" id="forestLabel">
+        <i class="fas fa-key"></i> Enchanted Forest
       </div>
-      <div class="zone-label" id="projectsLabel">
-        <i class="fas fa-code"></i> Projects
+      <div class="zone-label" id="caveLabel">
+        <i class="fas fa-fire"></i> Dark Caves
       </div>
-      <div class="zone-label" id="skillsLabel">
-        <i class="fas fa-laptop-code"></i> Skills
-      </div>
-      <div class="zone-label" id="contactLabel">
-        <i class="fas fa-envelope"></i> Contact
+      <div class="zone-label" id="lakeLabel">
+        <i class="fas fa-water"></i> Mystic Lake
       </div>
     </div>
 
     <!-- Three.js Script -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-
     <script>
       // Global variables
-      let scene, camera, renderer, character, controls;
+      let scene, camera, renderer, character;
       let currentZone = "welcome";
       const zones = {};
       const keys = {};
       const visitedZones = new Set();
+      const collectedArtifacts = {
+        templeMap: false,
+        forestKey: false,
+        caveTorch: false,
+        lakeRiddle: false,
+      };
+      let hasTorch = false;
+      let darkMode = false;
+      let characterRotation = 0; // Character rotation in radians
+      let targetRotation = 0; // Target rotation for smooth turning
+      let rotationSpeed = 0.05; // Rotation speed
+      let isMoving = false; // Track if character is moving
+      let characterLoaded = false; // Track if character model has loaded
+
+      // NEW: Track if footsteps are currently playing
+      let isFootstepsPlaying = false;
 
       let mixer;
+      let walkAction, idleAction; // Animation actions
       const clock = new THREE.Clock();
+
+      // NEW: Sound variables
+      let soundEnabled = true;
+      let footstepSound = new Audio("./sounds/footstepSound.mp3");
+      let collectSound = new Audio("./sounds/collectSound.mp3");
+      let victorySound = new Audio("./sounds/victorySound.mp3");
+      let ambientSound = new Audio("./sounds/ambientSound.mp3");
+
+      // NEW: Health system
+      let health = 100;
+      let lastDamageTime = 0;
+
+      // NEW: Footsteps effect
+      let footsteps = [];
+      let lastFootstepTime = 0;
+      const footstepInterval = 300; // ms between footsteps
+
+      // NEW: Obstacles
+      const obstacles = [
+        { x: -10, z: -5, radius: 2 },
+        { x: 12, z: 8, radius: 3 },
+        { x: 0, z: -15, radius: 2.5 },
+        { x: -18, z: 12, radius: 3 },
+      ];
 
       // Renderer setup
       renderer = new THREE.WebGLRenderer({
@@ -633,17 +1012,7 @@
           0.1,
           1000
         );
-        camera.position.set(0, 8, 12);
-
-        // OrbitControls setup
-        controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.target.set(0, 1, 0); // Focus point — adjust if needed
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.1;
-        controls.enablePan = false;
-        controls.minDistance = 5;
-        controls.maxDistance = 50;
-        controls.maxPolarAngle = Math.PI / 2; // Prevent going under the floor
+        camera.position.set(0, 24, 40);
 
         // Lighting
         const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
@@ -665,22 +1034,32 @@
         // Create zones
         createZones();
 
+        // NEW: Create obstacles
+        createObstacles();
+
+        // Create maze walls
+        createMaze();
+
         // Set up event listeners
         setupEventListeners();
 
         // Initialize UI
         initializeUI();
-
+        // NEW: Add portfolio button event listener
+        document
+          .getElementById("portfolioButton")
+          .addEventListener("click", () => {
+            window.location.href = "index.html";
+          });
         // Start animation loop
         animate();
 
-        // Hide loading screen
-        setTimeout(() => {
-          document.getElementById("loadingScreen").style.opacity = "0";
-          setTimeout(() => {
-            document.getElementById("loadingScreen").style.display = "none";
-          }, 500);
-        }, 2000);
+        // NEW: Start ambient sound
+        if (soundEnabled) {
+          ambientSound.loop = true;
+          ambientSound.volume = 0.3;
+          ambientSound.play();
+        }
       }
 
       function createFloor() {
@@ -700,112 +1079,240 @@
         scene.add(gridHelper);
       }
 
+      // NEW: Create obstacles
+      function createObstacles() {
+        const obstacleGeometry = new THREE.CylinderGeometry(1, 1, 2, 16);
+        const obstacleMaterial = new THREE.MeshStandardMaterial({
+          color: 0x8b0000,
+          roughness: 0.8,
+          metalness: 0.1,
+          emissive: 0x8b0000,
+          emissiveIntensity: 0.1,
+        });
+
+        obstacles.forEach((obstacle) => {
+          const obstacleMesh = new THREE.Mesh(
+            obstacleGeometry,
+            obstacleMaterial
+          );
+          obstacleMesh.position.set(obstacle.x, 1, obstacle.z);
+          obstacleMesh.castShadow = true;
+          obstacleMesh.receiveShadow = true;
+          scene.add(obstacleMesh);
+        });
+      }
+
+      function createMaze() {
+        // Create maze walls
+        const wallGeometry = new THREE.BoxGeometry(5, 5, 5);
+        const wallMaterial = new THREE.MeshStandardMaterial({
+          color: 0x5d4037,
+          roughness: 0.9,
+          metalness: 0.1,
+        });
+
+        // Predefined wall positions
+        const wallPositions = [
+          { x: -15, z: 0 },
+          { x: -5, z: -10 },
+          { x: 10, z: 15 },
+          { x: 20, z: -5 },
+          { x: 0, z: 20 },
+          { x: 15, z: 10 },
+          { x: -20, z: -15 },
+          { x: -10, z: 15 },
+          { x: 5, z: -20 },
+          { x: 25, z: 5 },
+          { x: -25, z: 10 },
+        ];
+
+        wallPositions.forEach((pos) => {
+          const wall = new THREE.Mesh(wallGeometry, wallMaterial);
+          wall.position.set(pos.x, 2.5, pos.z);
+          wall.castShadow = true;
+          wall.receiveShadow = true;
+          scene.add(wall);
+        });
+      }
+
       function createCharacter() {
+        // Create GLTFLoader instance
         const loader = new THREE.GLTFLoader();
+
+        // Load the character model from the assets folder
         loader.load(
-          "assets/character.glb", // path to your model
-          function (gltf) {
+          "assets/character.glb", // Path to your character model
+          (gltf) => {
             character = gltf.scene;
-            character.scale.set(2, 2, 2); // scale up the character
+
+            // Scale and position the character
+            character.scale.set(1, 1, 1);
             character.position.set(0, 0, 0);
+            character.rotation.y = Math.PI;
+
+            // Enable shadows for all meshes in the character
+            character.traverse((child) => {
+              if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+              }
+            });
+
             scene.add(character);
+            characterLoaded = true;
 
-            // Create animation mixer for the character
+            // Set up animations
             mixer = new THREE.AnimationMixer(character);
+            const clips = gltf.animations;
 
-            // Play the first animation clip (usually walking or idle)
-            if (gltf.animations.length > 0) {
-              const action = mixer.clipAction(gltf.animations[0]);
-              action.play();
+            if (clips && clips.length) {
+              // Find walk and idle animations by name, or use the first clip if not found
+              const walkClip =
+                clips.find((clip) => clip.name === "Walk") || clips[0];
+              const idleClip =
+                clips.find((clip) => clip.name === "Idle") || clips[0];
+
+              walkAction = mixer.clipAction(walkClip);
+              idleAction = mixer.clipAction(idleClip);
+
+              walkAction.setLoop(THREE.LoopRepeat);
+              idleAction.setLoop(THREE.LoopRepeat);
+
+              // Start with idle
+              idleAction.play();
             }
+
+            // Hide loading screen after character loads
+            setTimeout(() => {
+              document.getElementById("loadingScreen").style.opacity = "0";
+              setTimeout(() => {
+                document.getElementById("loadingScreen").style.display = "none";
+              }, 500);
+            }, 1000);
           },
-          undefined,
-          function (error) {
-            console.error("An error happened loading the character:", error);
+          undefined, // Progress callback
+          (error) => {
+            console.error("Error loading character model:", error);
+            // Fallback to capsule character if model fails to load
+            createFallbackCharacter();
           }
         );
+      }
+
+      function createFallbackCharacter() {
+        // Create a simple capsule character as fallback
+        const radius = 0.5;
+        const height = 2;
+        const radialSegments = 16;
+
+        const geometry = new THREE.CylinderGeometry(
+          radius,
+          radius,
+          height,
+          radialSegments
+        );
+
+        // Round the top and bottom to make it capsule-like
+        geometry.translate(0, height / 2, 0);
+        const topCap = new THREE.SphereGeometry(
+          radius,
+          radialSegments,
+          radialSegments / 2,
+          0,
+          Math.PI * 2,
+          0,
+          Math.PI / 2
+        );
+        topCap.translate(0, height, 0);
+        geometry.merge(topCap);
+
+        const bottomCap = new THREE.SphereGeometry(
+          radius,
+          radialSegments,
+          radialSegments / 2,
+          0,
+          Math.PI * 2,
+          Math.PI / 2,
+          Math.PI / 2
+        );
+        bottomCap.translate(0, 0, 0);
+        geometry.merge(bottomCap);
+
+        const material = new THREE.MeshStandardMaterial({
+          color: 0x4361ee,
+          metalness: 0.2,
+          roughness: 0.7,
+          emissive: 0x4361ee,
+          emissiveIntensity: 0.2,
+        });
+
+        character = new THREE.Mesh(geometry, material);
+        character.position.set(0, 1, 0);
+        character.castShadow = true;
+
+        scene.add(character);
+        characterLoaded = true;
+
+        // Hide loading screen
+        setTimeout(() => {
+          document.getElementById("loadingScreen").style.opacity = "0";
+          setTimeout(() => {
+            document.getElementById("loadingScreen").style.display = "none";
+          }, 500);
+        }, 1000);
       }
 
       function createZones() {
         // Define zone positions and data
         const zoneData = {
-          about: {
+          temple: {
             position: { x: -15, z: -10 },
-            color: 0x4cc9f0,
-            title: "About Me",
+            color: 0xffd700,
+            title: "Temple Ruins",
             content: `
-                              <p>Computer Science graduate from Kingston University with a passion for building user-friendly digital solutions.</p>
-                              <p>I combine technical skills with creativity to deliver reliable, effective software that makes a difference.</p>
-                              <ul>
-                                  <li>🎓 BSc Computer Science - Kingston University</li>
-                                  <li>💼 3+ years professional experience</li>
-                                  <li>🚀 Specialized in mobile & web development</li>
-                              </ul>
-                          `,
+                        <p>You found an ancient temple map fragment!</p>
+                        <p>This might help you navigate the maze.</p>
+                        <button class="btn" id="collectMap">Collect Map Fragment</button>
+                    `,
+            type: "map",
           },
-          services: {
+          forest: {
             position: { x: 15, z: -10 },
-            color: 0x4361ee,
-            title: "My Services",
+            color: 0x32cd32,
+            title: "Enchanted Forest",
             content: `
-                              <p>I offer comprehensive software development services:</p>
-                              <ul>
-                                  <li>📱 Mobile App Development (React Native, Kotlin)</li>
-                                  <li>🌐 Web Development (JavaScript, Node.js)</li>
-                                  <li>🗄️ Database Solutions (SQL, MongoDB)</li>
-                                  <li>🎨 UI/UX Design & Implementation</li>
-                              </ul>
-                              <a href="mailto:rajansunda@yahoo.co.uk" class="btn">Get Quote</a>
-                          `,
+                        <p>A shimmering key hangs from an old tree branch.</p>
+                        <p>This might unlock something important.</p>
+                        <button class="btn" id="collectKey">Collect Forest Key</button>
+                    `,
+            type: "key",
           },
-          projects: {
+          cave: {
             position: { x: -15, z: 15 },
-            color: 0x7209b7,
-            title: "Featured Projects",
+            color: 0x808080,
+            title: "Dark Caves",
             content: `
-                              <p>Here are some of my recent projects:</p>
-                              <ul>
-                                  <li>🏥 MyKneeRecovery App - React Native health app</li>
-                                  <li>🛡️ Stay Safe App - Location sharing platform</li>
-                                  <li>📚 Book Manager - Kotlin Android application</li>
-                                  <li>🌐 Portfolio Website - Interactive 3D experience</li>
-                              </ul>
-                              <a href="https://github.com/rajansunda" class="btn" target="_blank">View GitHub</a>
-                          `,
+                        <p>You found a torch! This will help you see in dark areas.</p>
+                        <button class="btn" id="collectTorch">Collect Torch</button>
+                    `,
+            type: "torch",
           },
-          skills: {
+          lake: {
             position: { x: 15, z: 15 },
-            color: 0xf72585,
-            title: "Technical Skills",
+            color: 0x4169e1,
+            title: "Mystic Lake",
             content: `
-                              <p>My technical expertise includes:</p>
-                              <ul>
-                                  <li>💻 Languages: JavaScript, Kotlin, C#, SQL</li>
-                                  <li>🔧 Frameworks: React Native, Node.js, ASP.NET</li>
-                                  <li>🎨 Frontend: HTML5, CSS3, React</li>
-                                  <li>🗄️ Databases: SQL Server, SQLite, MongoDB</li>
-                                  <li>🛠️ Tools: Android Studio, Visual Studio, Git</li>
-                              </ul>
-                          `,
-          },
-          contact: {
-            position: { x: 0, z: 25 },
-            color: 0x06ffa5,
-            title: "Get In Touch",
-            content: `
-                              <p>Ready to work together? Let's discuss your project!</p>
-                              <ul>
-                                  <li>📧 rajansunda@yahoo.co.uk</li>
-                                  <li>📱 07388864418</li>
-                                  <li>📍 London</li>
-                              </ul>
-                              <a href="mailto:rajansunda@yahoo.co.uk" class="btn">Send Email</a>
-                              <a href="https://github.com/rajansunda" class="btn" target="_blank">GitHub</a>
-                          `,
+                        <p>An inscription on a stone reads:</p>
+                        <p><em>"I speak without a mouth and hear without ears. I have no body, but I come alive with the wind. What am I?"</em></p>
+                        <p>Answer the riddle to proceed:</p>
+                        <input type="text" id="riddleAnswer" class="riddle-input" placeholder="Your answer...">
+                        <button class="btn" id="solveRiddle">Submit Answer</button>
+                    `,
+            type: "riddle",
           },
         };
 
-        // Create zone markers
+        // Create zone markers and power-ups
         Object.entries(zoneData).forEach(([key, data]) => {
           // Create zone marker
           const zoneGeometry = new THREE.CylinderGeometry(3, 3, 0.2, 8);
@@ -819,6 +1326,13 @@
           const zone = new THREE.Mesh(zoneGeometry, zoneMaterial);
           zone.position.set(data.position.x, 0.1, data.position.z);
           scene.add(zone);
+
+          // Create floating artifact
+          const artifact = document.createElement("div");
+          artifact.className = `power-up ${data.type}`;
+          artifact.id = `${key}Artifact`;
+          artifact.style.display = "none";
+          document.body.appendChild(artifact);
 
           // Create floating icon
           const iconGeometry = new THREE.SphereGeometry(0.5, 8, 8);
@@ -835,6 +1349,7 @@
             ...data,
             marker: zone,
             icon: icon,
+            collected: false,
           };
         });
       }
@@ -848,11 +1363,13 @@
 
         // Show initial section info
         updateSectionInfo({
-          title: "Welcome!",
+          title: "Welcome, Explorer!",
           content: `
-                          <p>Move around the 3D space to explore different sections of my portfolio. Each glowing zone contains information about my skills, projects, and experience.</p>
-                          <p>Use WASD keys to move your character around!</p>
-                      `,
+                    <p>You've discovered an ancient temple maze filled with secrets and challenges.</p>
+                    <p>Navigate through different zones to collect artifacts and solve riddles.</p>
+                    <p>Use WASD keys to move and turn your character through the maze.</p>
+                    <p>Find all artifacts to unlock the exit!</p>
+                `,
         });
       }
 
@@ -901,13 +1418,155 @@
 
       function updateMinimap() {
         const minimapPlayer = document.getElementById("minimapPlayer");
-        if (minimapPlayer && character) {
+        if (minimapPlayer && character && characterLoaded) {
           // Convert character position to minimap position
           const mapX = ((character.position.x + 40) / 80) * 180 + 10;
           const mapZ = ((character.position.z + 40) / 80) * 140 + 10;
 
           minimapPlayer.style.left = mapX + "px";
           minimapPlayer.style.top = mapZ + "px";
+        }
+      }
+
+      // NEW: Update compass
+      function updateCompass() {
+        const compassNeedle = document.getElementById("compassNeedle");
+        if (compassNeedle) {
+          // Convert character rotation to degrees and adjust for compass
+          let angle = THREE.MathUtils.radToDeg(characterRotation);
+          // Adjust angle to match compass directions
+          angle = (angle + 180) % 360;
+          compassNeedle.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+        }
+      }
+
+      // NEW: Toggle sound
+      function toggleSound() {
+        soundEnabled = !soundEnabled;
+        const soundToggle = document.getElementById("soundToggle");
+
+        if (soundEnabled) {
+          soundToggle.innerHTML = '<i class="fas fa-volume-up"></i>';
+          ambientSound.volume = 0.3;
+          ambientSound.play();
+        } else {
+          soundToggle.innerHTML = '<i class="fas fa-volume-mute"></i>';
+          ambientSound.volume = 0;
+          footstepSound.volume = 0;
+          collectSound.volume = 0;
+        }
+      }
+
+      // NEW: Create footstep effect
+      function createFootstep() {
+        if (!character || !characterLoaded) return;
+
+        const footstep = document.createElement("div");
+        footstep.className = "footsteps";
+
+        // Convert character position to screen position
+        const vector = new THREE.Vector3(
+          character.position.x,
+          0.1,
+          character.position.z
+        );
+        vector.project(camera);
+
+        const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+        const y = (vector.y * -0.5 + 0.5) * window.innerHeight;
+
+        footstep.style.left = x + "px";
+        footstep.style.top = y + "px";
+        footstep.style.opacity = "0.7";
+        footstep.style.transform = `scale(${0.5 + Math.random() * 0.5})`;
+
+        document.body.appendChild(footstep);
+        footsteps.push(footstep);
+
+        // Fade out and remove footsteps after a while
+        setTimeout(() => {
+          footstep.style.transition = "opacity 1s";
+          footstep.style.opacity = "0";
+          setTimeout(() => {
+            if (footstep.parentNode) {
+              footstep.parentNode.removeChild(footstep);
+            }
+            footsteps = footsteps.filter((f) => f !== footstep);
+          }, 1000);
+        }, 500);
+      }
+
+      // NEW: Update footsteps
+      function updateFootsteps() {
+        if (
+          isMoving &&
+          (keys["w"] || keys["s"]) &&
+          Date.now() - lastFootstepTime > footstepInterval
+        ) {
+          createFootstep();
+          lastFootstepTime = Date.now();
+
+          // Play footstep sound
+          if (soundEnabled) {
+            footstepSound.currentTime = 0;
+            footstepSound.volume = 0.3;
+            footstepSound.play();
+          }
+        }
+      }
+
+      // NEW: Check for obstacle collisions
+      function checkObstacleCollisions() {
+        if (!character || !characterLoaded) return;
+
+        const charPos = character.position;
+        let warningShown = false;
+
+        obstacles.forEach((obstacle) => {
+          const distance = Math.sqrt(
+            Math.pow(charPos.x - obstacle.x, 2) +
+              Math.pow(charPos.z - obstacle.z, 2)
+          );
+
+          if (distance < obstacle.radius + 1.5) {
+            // Show warning
+            document.getElementById("obstacleWarning").style.opacity = "1";
+            warningShown = true;
+
+            // Apply damage if not recently damaged
+            if (Date.now() - lastDamageTime > 2000) {
+              health -= 10;
+              lastDamageTime = Date.now();
+              updateHealthBar();
+
+              if (health <= 0) {
+                health = 0;
+                // Game over logic could be added here
+              }
+            }
+          }
+        });
+
+        if (!warningShown) {
+          document.getElementById("obstacleWarning").style.opacity = "0";
+        }
+      }
+
+      // NEW: Update health bar
+      function updateHealthBar() {
+        const healthBar = document.getElementById("healthBar");
+        healthBar.style.width = health + "%";
+
+        // Change color based on health
+        if (health > 70) {
+          healthBar.style.background =
+            "linear-gradient(90deg, #00ff00, #00ff00)";
+        } else if (health > 30) {
+          healthBar.style.background =
+            "linear-gradient(90deg, #ff9900, #ff9900)";
+        } else {
+          healthBar.style.background =
+            "linear-gradient(90deg, #ff0000, #ff0000)";
         }
       }
 
@@ -921,13 +1580,163 @@
         window.addEventListener("keyup", (e) => {
           keys[e.key.toLowerCase()] = false;
           updateKeyUI(e.key.toLowerCase(), false);
-        });
 
+          // NEW: Stop footstep sound when movement keys are released
+          if ((e.key === "w" || e.key === "s") && !keys["w"] && !keys["s"]) {
+            if (soundEnabled && !footstepSound.paused) {
+              footstepSound.pause();
+              isFootstepsPlaying = false;
+            }
+          }
+        });
         // Window resize
         window.addEventListener("resize", () => {
           camera.aspect = window.innerWidth / window.innerHeight;
           camera.updateProjectionMatrix();
           renderer.setSize(window.innerWidth, window.innerHeight);
+          updateZoneLabels();
+        });
+
+        // Collect map button
+        document.addEventListener("click", (e) => {
+          if (e.target.id === "collectMap") {
+            collectArtifact("temple");
+          } else if (e.target.id === "collectKey") {
+            collectArtifact("forest");
+          } else if (e.target.id === "collectTorch") {
+            collectArtifact("cave");
+          } else if (e.target.id === "solveRiddle") {
+            solveRiddle();
+          } else if (e.target.id === "victoryBtn") {
+            resetGame();
+          }
+        });
+
+        // NEW: Sound toggle
+        document
+          .getElementById("soundToggle")
+          .addEventListener("click", toggleSound);
+      }
+
+      function collectArtifact(zone) {
+        if (!zones[zone].collected) {
+          zones[zone].collected = true;
+          collectedArtifacts[
+            `${zone}${
+              zone === "temple" ? "Map" : zone === "forest" ? "Key" : "Torch"
+            }`
+          ] = true;
+
+          // Hide the artifact in the scene
+          zones[zone].icon.visible = false;
+
+          // Update progress indicator
+          document.getElementById(`progress-${zone}`).classList.add("visited");
+
+          // Show confirmation
+          updateSectionInfo({
+            title: "Artifact Collected!",
+            content: `<p>You've collected the ${zones[zone].title} artifact!</p>`,
+          });
+
+          // NEW: Play collect sound
+          if (soundEnabled) {
+            collectSound.currentTime = 0;
+            collectSound.volume = 0.5;
+            collectSound.play();
+          }
+
+          // Check if all artifacts are collected
+          checkVictory();
+        }
+      }
+
+      function solveRiddle() {
+        const answer = document
+          .getElementById("riddleAnswer")
+          .value.toLowerCase();
+        if (answer === "echo") {
+          zones["lake"].collected = true;
+          collectedArtifacts.lakeRiddle = true;
+          document.getElementById(`progress-lake`).classList.add("visited");
+
+          updateSectionInfo({
+            title: "Riddle Solved!",
+            content: `<p>Correct! The answer is "echo".</p><p>You've solved the mystic lake riddle!</p>`,
+          });
+
+          // NEW: Play collect sound
+          if (soundEnabled) {
+            collectSound.currentTime = 0;
+            collectSound.volume = 0.5;
+            collectSound.play();
+          }
+
+          // Check if all artifacts are collected
+          checkVictory();
+        } else {
+          updateSectionInfo({
+            title: "Try Again",
+            content: `<p>That's not the correct answer. Think carefully!</p>
+                              <p><em>"I speak without a mouth and hear without ears. I have no body, but I come alive with the wind. What am I?"</em></p>
+                              <input type="text" id="riddleAnswer" class="riddle-input" placeholder="Your answer...">
+                              <button class="btn" id="solveRiddle">Submit Answer</button>`,
+          });
+        }
+      }
+
+      function checkVictory() {
+        const allCollected = Object.values(collectedArtifacts).every(
+          (item) => item
+        );
+        if (allCollected) {
+          // Show victory panel
+          document.getElementById("victoryPanel").style.display = "block";
+
+          // NEW: Play victory sound
+          if (soundEnabled) {
+            victorySound.currentTime = 0;
+            victorySound.volume = 0.7;
+            victorySound.play();
+          }
+        }
+      }
+
+      function resetGame() {
+        // Reset game state
+        Object.keys(zones).forEach((zone) => {
+          zones[zone].collected = false;
+          zones[zone].icon.visible = true;
+        });
+
+        Object.keys(collectedArtifacts).forEach((artifact) => {
+          collectedArtifacts[artifact] = false;
+        });
+
+        // Reset UI
+        document.querySelectorAll(".progress-item").forEach((item) => {
+          item.classList.remove("visited");
+        });
+
+        document.getElementById("victoryPanel").style.display = "none";
+        hasTorch = false;
+        document.getElementById("torchIcon").classList.remove("active");
+
+        // NEW: Reset health
+        health = 100;
+        updateHealthBar();
+
+        // Reset character position and rotation
+        if (character) {
+          character.position.set(0, 0, 0);
+        }
+        characterRotation = 0;
+        targetRotation = 0;
+
+        // Show welcome message
+        updateSectionInfo({
+          title: "Welcome Back!",
+          content: `<p>The maze has reset. Can you escape again?</p>`,
         });
       }
 
@@ -939,25 +1748,37 @@
       }
 
       function updateCharacterMovement() {
-        if (!character) return false;
+        if (!character || !characterLoaded) return false;
 
         const speed = 0.15;
         let moved = false;
 
+        // Handle rotation (A/D keys - don't count as movement)
+        if (keys["a"]) {
+          targetRotation += 0.03;
+        }
+        if (keys["d"]) {
+          targetRotation -= 0.03;
+        }
+
+        // Smooth rotation
+        characterRotation +=
+          (targetRotation - characterRotation) * rotationSpeed;
+        character.rotation.y = characterRotation;
+
+        // Movement direction based on rotation
+        const dirX = Math.sin(characterRotation);
+        const dirZ = Math.cos(characterRotation);
+
+        // Only W/S keys count as actual movement
         if (keys["w"]) {
-          character.position.z -= speed;
+          character.position.x -= dirX * speed;
+          character.position.z -= dirZ * speed;
           moved = true;
         }
         if (keys["s"]) {
-          character.position.z += speed;
-          moved = true;
-        }
-        if (keys["a"]) {
-          character.position.x -= speed;
-          moved = true;
-        }
-        if (keys["d"]) {
-          character.position.x += speed;
+          character.position.x += dirX * speed;
+          character.position.z += dirZ * speed;
           moved = true;
         }
 
@@ -971,27 +1792,77 @@
           Math.min(40, character.position.z)
         );
 
-        // Update camera to follow character
-        //camera.position.x = character.position.x;
-        //camera.position.z = character.position.z + 12;
-        //camera.lookAt(
-        //character.position.x,
-        //character.position.y,
-        //character.position.z
-        //);
+        // Update global isMoving state
+        isMoving = moved;
 
         return moved;
       }
 
+      // MODIFIED: Update footsteps function
+      function updateFootsteps() {
+        const isMovingForwardBackward = keys["w"] || keys["s"];
+
+        // Create visual footsteps at intervals
+        if (
+          isMoving &&
+          isMovingForwardBackward &&
+          Date.now() - lastFootstepTime > footstepInterval
+        ) {
+          createFootstep();
+          lastFootstepTime = Date.now();
+        }
+
+        // NEW: Manage continuous footstep sound
+        if (isMoving && isMovingForwardBackward) {
+          // Play sound if not already playing
+          if (soundEnabled && !isFootstepsPlaying) {
+            footstepSound.currentTime = 0;
+            footstepSound.volume = 0.3;
+            footstepSound.loop = true; // Enable looping
+            footstepSound.play();
+            isFootstepsPlaying = true;
+          }
+        } else {
+          // Stop sound if playing
+          if (soundEnabled && isFootstepsPlaying) {
+            footstepSound.pause();
+            isFootstepsPlaying = false;
+          }
+        }
+      }
+
+      function updateCamera() {
+        if (!character || !characterLoaded) return;
+
+        // Camera position behind and above the character
+        const cameraDistance = 8;
+        const cameraHeight = 4;
+
+        // Calculate camera position based on character's rotation
+        const camX = Math.sin(characterRotation) * cameraDistance;
+        const camZ = Math.cos(characterRotation) * cameraDistance;
+
+        camera.position.x = character.position.x + camX;
+        camera.position.y = character.position.y + cameraHeight;
+        camera.position.z = character.position.z + camZ;
+
+        // Make camera look at character
+        camera.lookAt(
+          character.position.x,
+          character.position.y + 2,
+          character.position.z
+        );
+      }
+
       function checkZoneProximity() {
-        if (!character) return;
+        if (!character || !characterLoaded) return;
 
         const characterPos = character.position;
         let nearestZone = null;
         let minDistance = Infinity;
 
         Object.entries(zones).forEach(([key, zone]) => {
-          if (!zone.position) return; // Prevents crash if zone.position is undefined
+          if (!zone.position) return;
 
           const distance = Math.sqrt(
             Math.pow(characterPos.x - zone.position.x, 2) +
@@ -1012,6 +1883,24 @@
               label.classList.remove("nearby");
             }
           }
+
+          // Update artifact position in DOM
+          const artifact = document.getElementById(`${key}Artifact`);
+          if (artifact) {
+            const vector = new THREE.Vector3(
+              zone.position.x,
+              3,
+              zone.position.z
+            );
+            vector.project(camera);
+
+            const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+            const y = (vector.y * -0.5 + 0.5) * window.innerHeight;
+
+            artifact.style.left = `${x}px`;
+            artifact.style.top = `${y}px`;
+            artifact.style.display = zone.collected ? "none" : "block";
+          }
         });
 
         // Update distance indicator
@@ -1021,38 +1910,54 @@
           currentZone = nearestZone;
           visitedZones.add(nearestZone);
           updateSectionInfo(zones[nearestZone]);
-          updateProgressIndicator();
         } else if (!nearestZone && currentZone !== "welcome") {
           currentZone = "welcome";
           updateSectionInfo({
-            title: "Welcome!",
+            title: "Exploring the Maze",
             content: `
-        <p>Move around the 3D space to explore different sections of my portfolio. Each glowing zone contains information about my skills, projects, and experience.</p>
-        <p>Use WASD keys to move your character around!</p>
-      `,
+                        <p>Navigate through the ancient temple maze to find artifacts.</p>
+                        <p>Look for glowing areas - they mark important locations.</p>
+                    `,
           });
+        }
+
+        // Toggle dark mode when in cave zone
+        if (nearestZone === "cave" && !hasTorch) {
+          if (!darkMode) {
+            scene.background = new THREE.Color(0x000000);
+            scene.fog = new THREE.Fog(0x000000, 20, 50);
+            darkMode = true;
+          }
+        } else {
+          if (darkMode) {
+            scene.background = new THREE.Color(0x0a0a0a);
+            scene.fog = new THREE.Fog(0x0a0a0a, 50, 200);
+            darkMode = false;
+          }
+        }
+
+        // Show torch icon if player has torch
+        if (collectedArtifacts.caveTorch) {
+          document.getElementById("torchIcon").classList.add("active");
+          hasTorch = true;
+          if (darkMode) {
+            scene.background = new THREE.Color(0x0a0a0a);
+            scene.fog = new THREE.Fog(0x0a0a0a, 50, 200);
+            darkMode = false;
+          }
         }
       }
 
-      function updateDistanceIndicator(distance) {
+      function updateDistanceIndicator(minDistance) {
         const distanceIndicator = document.getElementById("distanceIndicator");
         const distanceValue = document.getElementById("distanceValue");
 
-        if (distance < Infinity && distance > 5) {
+        if (minDistance < Infinity && minDistance > 5) {
           distanceIndicator.classList.add("visible");
-          distanceValue.textContent = Math.round(distance);
+          distanceValue.textContent = Math.round(minDistance);
         } else {
           distanceIndicator.classList.remove("visible");
         }
-      }
-
-      function updateProgressIndicator() {
-        visitedZones.forEach((zone) => {
-          const progressItem = document.getElementById(`progress-${zone}`);
-          if (progressItem) {
-            progressItem.classList.add("visited");
-          }
-        });
       }
 
       function updateSectionInfo(zoneData) {
@@ -1077,8 +1982,26 @@
         // Update character movement
         const moved = updateCharacterMovement();
 
+        // Update animations based on movement state
+        if (walkAction && idleAction) {
+          if (isMoving) {
+            if (!walkAction.isRunning()) {
+              idleAction.stop();
+              walkAction.play();
+            }
+          } else {
+            if (!idleAction.isRunning()) {
+              walkAction.stop();
+              idleAction.play();
+            }
+          }
+        }
+
+        // Update camera to follow character
+        updateCamera();
+
         // Update UI elements if character moved
-        if (moved) {
+        if (moved && characterLoaded) {
           updateZoneLabels();
           updateMinimap();
         }
@@ -1088,12 +2011,21 @@
 
         // Animate zone icons
         Object.values(zones).forEach((zone) => {
-          if (zone.icon) {
+          if (zone.icon && !zone.collected) {
             zone.icon.rotation.y += 0.02;
             zone.icon.position.y = 3 + Math.sin(Date.now() * 0.002) * 0.5;
           }
         });
-        if (controls) controls.update();
+
+        // NEW: Update compass
+        updateCompass();
+
+        // NEW: Update footsteps
+        updateFootsteps();
+
+        // NEW: Check for obstacle collisions
+        checkObstacleCollisions();
+
         renderer.render(scene, camera);
       }
 
