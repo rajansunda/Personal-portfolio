@@ -680,7 +680,38 @@
         pointer-events: none;
         z-index: 20;
       }
+      /* NEW: Portfolio Button */
+      .portfolio-button {
+        position: absolute;
+        top: 20px;
+        left: 70px; /* Positioned to the right of sound toggle */
+        background: rgba(30, 40, 80, 0.8);
+        padding: 10px 15px;
+        border-radius: 25px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        pointer-events: auto;
+        z-index: 20;
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(76, 201, 240, 0.3);
+        color: #4cc9f0;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+      }
 
+      .portfolio-button i {
+        margin-right: 8px;
+        font-size: 1rem;
+      }
+
+      .portfolio-button:hover {
+        background: rgba(76, 201, 240, 0.5);
+        transform: translateY(-2px);
+        box-shadow: 0 0 15px rgba(76, 201, 240, 0.5);
+      }
       /* Responsive Design */
       @media (max-width: 768px) {
         .header {
@@ -692,6 +723,13 @@
           font-size: 1.5rem;
         }
 
+        /* NEW: Portfolio button mobile positioning */
+        .portfolio-button {
+          top: 80px;
+          left: 60px;
+          padding: 8px 12px;
+          font-size: 0.8rem;
+        }
         .controls {
           bottom: 20px;
           right: 20px;
@@ -775,6 +813,11 @@
       <!-- NEW: Sound Toggle -->
       <div class="sound-toggle" id="soundToggle">
         <i class="fas fa-volume-up"></i>
+      </div>
+
+      <!-- NEW: Portfolio Button -->
+      <div class="portfolio-button" id="portfolioButton">
+        <i class="fas fa-arrow-left"></i> Portfolio
       </div>
 
       <!-- NEW: Health Bar -->
@@ -1002,7 +1045,12 @@
 
         // Initialize UI
         initializeUI();
-
+        // NEW: Add portfolio button event listener
+        document
+          .getElementById("portfolioButton")
+          .addEventListener("click", () => {
+            window.location.href = "index.html";
+          });
         // Start animation loop
         animate();
 
