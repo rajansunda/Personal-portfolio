@@ -914,6 +914,9 @@
       let isMoving = false; // Track if character is moving
       let characterLoaded = false; // Track if character model has loaded
 
+      // NEW: Track if footsteps are currently playing
+      let isFootstepsPlaying = false;
+
       let mixer;
       let walkAction, idleAction; // Animation actions
       const clock = new THREE.Clock();
@@ -1447,7 +1450,11 @@
 
       // NEW: Update footsteps
       function updateFootsteps() {
-        if (isMoving && Date.now() - lastFootstepTime > footstepInterval) {
+        if (
+          isMoving &&
+          (keys["w"] || keys["s"]) &&
+          Date.now() - lastFootstepTime > footstepInterval
+        ) {
           createFootstep();
           lastFootstepTime = Date.now();
 
@@ -1525,8 +1532,15 @@
         window.addEventListener("keyup", (e) => {
           keys[e.key.toLowerCase()] = false;
           updateKeyUI(e.key.toLowerCase(), false);
-        });
 
+          // NEW: Stop footstep sound when movement keys are released
+          if ((e.key === "w" || e.key === "s") && !keys["w"] && !keys["s"]) {
+            if (soundEnabled && !footstepSound.paused) {
+              footstepSound.pause();
+              isFootstepsPlaying = false;
+            }
+          }
+        });
         // Window resize
         window.addEventListener("resize", () => {
           camera.aspect = window.innerWidth / window.innerHeight;
@@ -1736,17 +1750,35 @@
         return moved;
       }
 
+      // MODIFIED: Update footsteps function
       function updateFootsteps() {
-        // Only create footsteps if character is moving
-        if (isMoving && Date.now() - lastFootstepTime > footstepInterval) {
+        const isMovingForwardBackward = keys["w"] || keys["s"];
+
+        // Create visual footsteps at intervals
+        if (
+          isMoving &&
+          isMovingForwardBackward &&
+          Date.now() - lastFootstepTime > footstepInterval
+        ) {
           createFootstep();
           lastFootstepTime = Date.now();
+        }
 
-          // Play footstep sound
-          if (soundEnabled) {
+        // NEW: Manage continuous footstep sound
+        if (isMoving && isMovingForwardBackward) {
+          // Play sound if not already playing
+          if (soundEnabled && !isFootstepsPlaying) {
             footstepSound.currentTime = 0;
             footstepSound.volume = 0.3;
+            footstepSound.loop = true; // Enable looping
             footstepSound.play();
+            isFootstepsPlaying = true;
+          }
+        } else {
+          // Stop sound if playing
+          if (soundEnabled && isFootstepsPlaying) {
+            footstepSound.pause();
+            isFootstepsPlaying = false;
           }
         }
       }
