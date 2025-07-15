@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ancient Maze Explorer - Enhanced Movement</title>
+    <title>Ancient Maze Explorer - Enhanced Experience</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
@@ -539,6 +539,148 @@
         opacity: 0.8;
       }
 
+      /* NEW FEATURES */
+
+      /* Compass */
+      .compass {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        width: 100px;
+        height: 100px;
+        background: rgba(30, 40, 80, 0.8);
+        border-radius: 50%;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(76, 201, 240, 0.3);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 20;
+      }
+
+      .compass-needle {
+        position: absolute;
+        width: 4px;
+        height: 40px;
+        background: #ff3333;
+        transform-origin: bottom;
+        bottom: 50%;
+        border-radius: 2px;
+      }
+
+      .directions {
+        position: relative;
+        width: 90%;
+        height: 90%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      .directions span {
+        position: absolute;
+      }
+
+      .directions .n {
+        top: 0;
+      }
+      .directions .e {
+        right: 0;
+      }
+      .directions .s {
+        bottom: 0;
+      }
+      .directions .w {
+        left: 0;
+      }
+
+      /* Sound Toggle */
+      .sound-toggle {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        width: 40px;
+        height: 40px;
+        background: rgba(30, 40, 80, 0.8);
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        pointer-events: auto;
+        z-index: 20;
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(76, 201, 240, 0.3);
+      }
+
+      .sound-toggle i {
+        font-size: 1.2rem;
+        color: #4cc9f0;
+      }
+
+      /* Health Bar */
+      .health-bar-container {
+        position: absolute;
+        top: 80px;
+        left: 30px;
+        width: 150px;
+        height: 20px;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid rgba(76, 201, 240, 0.3);
+        pointer-events: none;
+      }
+
+      .health-bar {
+        height: 100%;
+        width: 100%;
+        background: linear-gradient(90deg, #ff0000, #ff9900, #00ff00);
+        transition: width 0.3s;
+      }
+
+      .health-label {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 0.7rem;
+        font-weight: bold;
+        color: white;
+        text-shadow: 0 0 2px black;
+      }
+
+      /* Footsteps Effect */
+      .footsteps {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        background: rgba(76, 201, 240, 0.7);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 3;
+        opacity: 0;
+      }
+
+      /* Obstacle Warning */
+      .obstacle-warning {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(255, 0, 0, 0.7);
+        padding: 15px 30px;
+        border-radius: 10px;
+        color: white;
+        font-weight: bold;
+        opacity: 0;
+        transition: opacity 0.3s;
+        pointer-events: none;
+        z-index: 20;
+      }
+
       /* Responsive Design */
       @media (max-width: 768px) {
         .header {
@@ -580,6 +722,18 @@
           bottom: 150px;
           font-size: 0.8rem;
         }
+
+        /* New features */
+        .compass {
+          top: 80px;
+          width: 80px;
+          height: 80px;
+        }
+
+        .sound-toggle {
+          top: 80px;
+          left: 10px;
+        }
       }
     </style>
   </head>
@@ -618,6 +772,34 @@
 
     <!-- UI Overlay -->
     <div class="ui-overlay">
+      <!-- NEW: Sound Toggle -->
+      <div class="sound-toggle" id="soundToggle">
+        <i class="fas fa-volume-up"></i>
+      </div>
+
+      <!-- NEW: Health Bar -->
+      <div class="health-bar-container">
+        <div class="health-bar" id="healthBar" style="width: 100%">
+          <div class="health-label">HEALTH</div>
+        </div>
+      </div>
+
+      <!-- NEW: Compass -->
+      <div class="compass">
+        <div class="compass-needle" id="compassNeedle"></div>
+        <div class="directions">
+          <span class="n">N</span>
+          <span class="e">E</span>
+          <span class="s">S</span>
+          <span class="w">W</span>
+        </div>
+      </div>
+
+      <!-- NEW: Obstacle Warning -->
+      <div class="obstacle-warning" id="obstacleWarning">
+        <i class="fas fa-exclamation-triangle"></i> Obstacle Ahead!
+      </div>
+
       <!-- Header -->
       <div class="header">
         <h1>Ancient Maze Explorer</h1>
@@ -736,6 +918,38 @@
       let walkAction, idleAction; // Animation actions
       const clock = new THREE.Clock();
 
+      // NEW: Sound variables
+      let soundEnabled = true;
+      let footstepSound = new Audio(
+        "https://assets.mixkit.co/sfx/preview/mixkit-footsteps-on-tall-grass-536.mp3"
+      );
+      let collectSound = new Audio(
+        "https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.mp3"
+      );
+      let victorySound = new Audio(
+        "https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3"
+      );
+      let ambientSound = new Audio(
+        "https://assets.mixkit.co/sfx/preview/mixkit-mysterious-wind-632.mp3"
+      );
+
+      // NEW: Health system
+      let health = 100;
+      let lastDamageTime = 0;
+
+      // NEW: Footsteps effect
+      let footsteps = [];
+      let lastFootstepTime = 0;
+      const footstepInterval = 300; // ms between footsteps
+
+      // NEW: Obstacles
+      const obstacles = [
+        { x: -10, z: -5, radius: 2 },
+        { x: 12, z: 8, radius: 3 },
+        { x: 0, z: -15, radius: 2.5 },
+        { x: -18, z: 12, radius: 3 },
+      ];
+
       // Renderer setup
       renderer = new THREE.WebGLRenderer({
         canvas: document.getElementById("gameCanvas"),
@@ -782,6 +996,9 @@
         // Create zones
         createZones();
 
+        // NEW: Create obstacles
+        createObstacles();
+
         // Create maze walls
         createMaze();
 
@@ -793,6 +1010,13 @@
 
         // Start animation loop
         animate();
+
+        // NEW: Start ambient sound
+        if (soundEnabled) {
+          ambientSound.loop = true;
+          ambientSound.volume = 0.3;
+          ambientSound.play();
+        }
       }
 
       function createFloor() {
@@ -810,6 +1034,29 @@
         // Add grid
         const gridHelper = new THREE.GridHelper(200, 40, 0x333333, 0x222222);
         scene.add(gridHelper);
+      }
+
+      // NEW: Create obstacles
+      function createObstacles() {
+        const obstacleGeometry = new THREE.CylinderGeometry(1, 1, 2, 16);
+        const obstacleMaterial = new THREE.MeshStandardMaterial({
+          color: 0x8b0000,
+          roughness: 0.8,
+          metalness: 0.1,
+          emissive: 0x8b0000,
+          emissiveIntensity: 0.1,
+        });
+
+        obstacles.forEach((obstacle) => {
+          const obstacleMesh = new THREE.Mesh(
+            obstacleGeometry,
+            obstacleMaterial
+          );
+          obstacleMesh.position.set(obstacle.x, 1, obstacle.z);
+          obstacleMesh.castShadow = true;
+          obstacleMesh.receiveShadow = true;
+          scene.add(obstacleMesh);
+        });
       }
 
       function createMaze() {
@@ -1138,6 +1385,144 @@
         }
       }
 
+      // NEW: Update compass
+      function updateCompass() {
+        const compassNeedle = document.getElementById("compassNeedle");
+        if (compassNeedle) {
+          // Convert character rotation to degrees and adjust for compass
+          let angle = THREE.MathUtils.radToDeg(characterRotation);
+          // Adjust angle to match compass directions
+          angle = (angle + 180) % 360;
+          compassNeedle.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+        }
+      }
+
+      // NEW: Toggle sound
+      function toggleSound() {
+        soundEnabled = !soundEnabled;
+        const soundToggle = document.getElementById("soundToggle");
+
+        if (soundEnabled) {
+          soundToggle.innerHTML = '<i class="fas fa-volume-up"></i>';
+          ambientSound.volume = 0.3;
+          ambientSound.play();
+        } else {
+          soundToggle.innerHTML = '<i class="fas fa-volume-mute"></i>';
+          ambientSound.volume = 0;
+          footstepSound.volume = 0;
+          collectSound.volume = 0;
+        }
+      }
+
+      // NEW: Create footstep effect
+      function createFootstep() {
+        if (!character || !characterLoaded) return;
+
+        const footstep = document.createElement("div");
+        footstep.className = "footsteps";
+
+        // Convert character position to screen position
+        const vector = new THREE.Vector3(
+          character.position.x,
+          0.1,
+          character.position.z
+        );
+        vector.project(camera);
+
+        const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+        const y = (vector.y * -0.5 + 0.5) * window.innerHeight;
+
+        footstep.style.left = x + "px";
+        footstep.style.top = y + "px";
+        footstep.style.opacity = "0.7";
+        footstep.style.transform = `scale(${0.5 + Math.random() * 0.5})`;
+
+        document.body.appendChild(footstep);
+        footsteps.push(footstep);
+
+        // Fade out and remove footsteps after a while
+        setTimeout(() => {
+          footstep.style.transition = "opacity 1s";
+          footstep.style.opacity = "0";
+          setTimeout(() => {
+            if (footstep.parentNode) {
+              footstep.parentNode.removeChild(footstep);
+            }
+            footsteps = footsteps.filter((f) => f !== footstep);
+          }, 1000);
+        }, 500);
+      }
+
+      // NEW: Update footsteps
+      function updateFootsteps() {
+        if (isMoving && Date.now() - lastFootstepTime > footstepInterval) {
+          createFootstep();
+          lastFootstepTime = Date.now();
+
+          // Play footstep sound
+          if (soundEnabled) {
+            footstepSound.currentTime = 0;
+            footstepSound.volume = 0.3;
+            footstepSound.play();
+          }
+        }
+      }
+
+      // NEW: Check for obstacle collisions
+      function checkObstacleCollisions() {
+        if (!character || !characterLoaded) return;
+
+        const charPos = character.position;
+        let warningShown = false;
+
+        obstacles.forEach((obstacle) => {
+          const distance = Math.sqrt(
+            Math.pow(charPos.x - obstacle.x, 2) +
+              Math.pow(charPos.z - obstacle.z, 2)
+          );
+
+          if (distance < obstacle.radius + 1.5) {
+            // Show warning
+            document.getElementById("obstacleWarning").style.opacity = "1";
+            warningShown = true;
+
+            // Apply damage if not recently damaged
+            if (Date.now() - lastDamageTime > 2000) {
+              health -= 10;
+              lastDamageTime = Date.now();
+              updateHealthBar();
+
+              if (health <= 0) {
+                health = 0;
+                // Game over logic could be added here
+              }
+            }
+          }
+        });
+
+        if (!warningShown) {
+          document.getElementById("obstacleWarning").style.opacity = "0";
+        }
+      }
+
+      // NEW: Update health bar
+      function updateHealthBar() {
+        const healthBar = document.getElementById("healthBar");
+        healthBar.style.width = health + "%";
+
+        // Change color based on health
+        if (health > 70) {
+          healthBar.style.background =
+            "linear-gradient(90deg, #00ff00, #00ff00)";
+        } else if (health > 30) {
+          healthBar.style.background =
+            "linear-gradient(90deg, #ff9900, #ff9900)";
+        } else {
+          healthBar.style.background =
+            "linear-gradient(90deg, #ff0000, #ff0000)";
+        }
+      }
+
       function setupEventListeners() {
         // Keyboard controls
         window.addEventListener("keydown", (e) => {
@@ -1172,6 +1557,11 @@
             resetGame();
           }
         });
+
+        // NEW: Sound toggle
+        document
+          .getElementById("soundToggle")
+          .addEventListener("click", toggleSound);
       }
 
       function collectArtifact(zone) {
@@ -1195,6 +1585,13 @@
             content: `<p>You've collected the ${zones[zone].title} artifact!</p>`,
           });
 
+          // NEW: Play collect sound
+          if (soundEnabled) {
+            collectSound.currentTime = 0;
+            collectSound.volume = 0.5;
+            collectSound.play();
+          }
+
           // Check if all artifacts are collected
           checkVictory();
         }
@@ -1213,6 +1610,13 @@
             title: "Riddle Solved!",
             content: `<p>Correct! The answer is "echo".</p><p>You've solved the mystic lake riddle!</p>`,
           });
+
+          // NEW: Play collect sound
+          if (soundEnabled) {
+            collectSound.currentTime = 0;
+            collectSound.volume = 0.5;
+            collectSound.play();
+          }
 
           // Check if all artifacts are collected
           checkVictory();
@@ -1234,6 +1638,13 @@
         if (allCollected) {
           // Show victory panel
           document.getElementById("victoryPanel").style.display = "block";
+
+          // NEW: Play victory sound
+          if (soundEnabled) {
+            victorySound.currentTime = 0;
+            victorySound.volume = 0.7;
+            victorySound.play();
+          }
         }
       }
 
@@ -1256,6 +1667,10 @@
         document.getElementById("victoryPanel").style.display = "none";
         hasTorch = false;
         document.getElementById("torchIcon").classList.remove("active");
+
+        // NEW: Reset health
+        health = 100;
+        updateHealthBar();
 
         // Reset character position and rotation
         if (character) {
@@ -1515,6 +1930,15 @@
             zone.icon.position.y = 3 + Math.sin(Date.now() * 0.002) * 0.5;
           }
         });
+
+        // NEW: Update compass
+        updateCompass();
+
+        // NEW: Update footsteps
+        updateFootsteps();
+
+        // NEW: Check for obstacle collisions
+        checkObstacleCollisions();
 
         renderer.render(scene, camera);
       }
