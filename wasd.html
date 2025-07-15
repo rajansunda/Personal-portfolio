@@ -1691,14 +1691,12 @@
         const speed = 0.15;
         let moved = false;
 
-        // Handle rotation
+        // Handle rotation (A/D keys - don't count as movement)
         if (keys["a"]) {
           targetRotation += 0.03;
-          moved = true;
         }
         if (keys["d"]) {
           targetRotation -= 0.03;
-          moved = true;
         }
 
         // Smooth rotation
@@ -1710,6 +1708,7 @@
         const dirX = Math.sin(characterRotation);
         const dirZ = Math.cos(characterRotation);
 
+        // Only W/S keys count as actual movement
         if (keys["w"]) {
           character.position.x -= dirX * speed;
           character.position.z -= dirZ * speed;
@@ -1735,6 +1734,21 @@
         isMoving = moved;
 
         return moved;
+      }
+
+      function updateFootsteps() {
+        // Only create footsteps if character is moving
+        if (isMoving && Date.now() - lastFootstepTime > footstepInterval) {
+          createFootstep();
+          lastFootstepTime = Date.now();
+
+          // Play footstep sound
+          if (soundEnabled) {
+            footstepSound.currentTime = 0;
+            footstepSound.volume = 0.3;
+            footstepSound.play();
+          }
+        }
       }
 
       function updateCamera() {
