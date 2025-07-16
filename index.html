@@ -61,9 +61,12 @@
       @media (max-width: 768px) {
         #header {
           background-image: url(images/MobileBackground.png) !important;
-          background-attachment: scroll;
+          background-attachment: initial; /* Change from scroll to initial */
           background-size: cover;
-          background-position: center center;
+          background-position: center;
+          background-repeat: no-repeat; /* Add this to ensure image repeating doesn't cause issues */
+          min-height: 100vh; /* Add this to ensure full height */
+          height: auto; /* Allow header to expand if needed */
         }
 
         body.light #header {
@@ -84,6 +87,19 @@
         
         body.light #header::before {
           background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(234,234,234,0.1));
+        }
+      }
+
+      /* Add specific iPad media query */
+      @media only screen 
+      and (min-device-width: 768px) 
+      and (max-device-width: 1024px) {
+        #header {
+          background-attachment: initial;
+          background-size: cover;
+          background-position: center;
+          background-repeat: no-repeat;
+          min-height: 100vh;
         }
       }
 
@@ -634,6 +650,16 @@
           font-size: 22px;
         }
       }
+
+      #about p {
+  margin-bottom: 20px;
+  line-height: 1.8;
+}
+
+#about ul li {
+  margin-bottom: 10px;
+  padding-left: 20px;
+}
     </style>
   </head>
   <body>
@@ -681,10 +707,26 @@
       <div class="container">
         <h2>About Me</h2>
         <p>
-          I'm a Computer Science graduate from Kingston University. I enjoy
-          building creative, user-friendly software and working in collaborative
-          teams. I've built apps like MyKneeRecovery and StaySafe, and worked on
-          projects for Amazon and ALDI.
+          As a Computer Science graduate, I specialise in transforming complex ideas into intuitive digital solutions. 
+          My full-stack expertise spans React Native, Node.js, Kotlin, and C#, complemented by strong UX/UI design 
+          skills from academic and professional work.
+        </p>
+        <p>
+          During my 3-year progression from Apprentice to Junior Developer at Ashbury Click, I:
+        </p>
+        <ul style="list-style-type: none; margin: 20px 0;">
+          <li>• Developed and enhanced systems using C#, ASP.NET, and SQL</li>
+          <li>• Added new functionalities to both internal tools and client-facing applications</li>
+          <li>• Created productivity solutions like an automated task management system</li>
+          <li>• Built SQL-based reporting frameworks from requirements to implementation</li>
+        </ul>
+        <p>
+          I thrive in Agile/SCRUM environments and value collaborative approaches to refine usability. 
+          Now seeking full-stack roles where I can apply my technical and design skills to build scalable, 
+          impactful solutions.
+        </p>
+        <p>
+          Let's connect and discuss how I can contribute to your next project!
         </p>
       </div>
     </section>
