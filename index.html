@@ -504,47 +504,49 @@
       /* Small tablets: 600px - 768px */
       @media (max-width: 768px) {
         nav {
-          position: relative;
-          padding: 20px 0;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          padding: 15px 20px;
+          background: rgba(0,0,0,0.8);
+          z-index: 1000;
+        }
+
+        .logo {
+          position: absolute;
+          top: 50px;  /* Moved down from 10px to 20px */
+          left: 5px; /* Moved left from 20px to 15px */
+          margin: 0;
+          width: 45px;  /* Explicitly set size */
+          height: 45px; /* Explicitly set size */
+        }
+
+        .theme-toggle {
+          position: absolute;
+          top: 50px;          /* Keep the same top position */
+          right: 20px;        /* Move closer to the right edge */
+          width: 38px;
+          height: 38px;
+          font-size: 16px;
+          transform: none;    /* Remove any transformations */
+          margin: 0;          /* Remove margins */
+          z-index: 1000;      /* Ensure it's above other elements */
         }
 
         .menu-toggle {
-          display: block;
           position: absolute;
-          right: 15px;
-          top: 50%;
-          transform: translateY(-50%);
-          z-index: 100;
+          top: 25px;         /* Keep this the same to align with theme toggle */
+          right: 20px;
+          transform: none;
         }
 
-        nav ul {
-          position: fixed;
-          top: 0;
-          right: -100%;
-          width: 70%;
-          height: 100vh;
-          background: #1a1a1a;
-          flex-direction: column;
-          padding: 100px 0 0;
-          transition: 0.5s;
-          z-index: 90;
+        .header-text {
+          padding-top: 80px; /* Add space below the fixed nav */
         }
 
-        nav ul.active {
-          right: 0;
-        }
-
-        nav ul li {
-          margin: 15px 30px;
-          text-align: left;
-        }
-
-        body.light nav ul {
-          background: #f4f4f4;
-        }
-
-        body.light nav ul li a {
-          color: #222;
+        body.light nav {
+          background: rgba(255,255,255,0.8); /* light mode nav background */
         }
 
         .header-text h1 {
@@ -584,16 +586,6 @@
           height: 40px;
           font-size: 18px;
         }
-
-        .theme-toggle {
-          position: absolute;
-          right: 60px;
-          top: 50%;
-          transform: translateY(-50%);
-          width: 38px;
-          height: 38px;
-          font-size: 16px;
-        }
       }
 
       /* Mobile: 480px and below */
@@ -626,7 +618,7 @@
         }
 
         .theme-toggle {
-          right: 50px;
+          right: 20px;        /* Match the tablet view */
           width: 36px;
           height: 36px;
           font-size: 16px;
